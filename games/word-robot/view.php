@@ -11,6 +11,8 @@ $image = $game_data['image'] ?? '';
 $level = $game_data['level'] ?? 1;
 ?>
 
+<?php ob_start(); ?>
+
 <div class="game-container robot">
   <h1>Palabrabot <small>Nivel <?= $level ?></small></h1>
   
@@ -387,3 +389,7 @@ function showMessage(text, type) {
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 </style>
+<?php
+$content = ob_get_clean();
+include '../../includes/game_layout.php';
+?>

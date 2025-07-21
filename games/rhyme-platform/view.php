@@ -9,6 +9,7 @@ $words = $game_data['words'] ?? ['col', 'gol', 'pan', 'sal', 'pez'];
 $rhymes = $game_data['rhymes'] ?? ['col', 'gol'];
 $level = $game_data['level'] ?? 1;
 ?>
+<?php ob_start(); ?>
 
 <div class="game-container platform">
   <h1>Saltarima <small>Nivel <?= $level ?></small></h1>
@@ -344,3 +345,7 @@ nextBtn.addEventListener('click', nextLevel);
     font-weight: bold;
 }
 </style>
+<?php
+$content = ob_get_clean();
+include '../../includes/game_layout.php';
+?>

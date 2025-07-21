@@ -11,6 +11,7 @@ $image = $game_data['image'] ?? '';
 $audio = $game_data['audio'] ?? '';
 $level = $game_data['level'] ?? 1;
 ?>
+<?php ob_start(); ?>
 
 <div class="game-container syllables">
   <h1>Caza Sílabas <small>Nivel <?= $level ?></small></h1>
@@ -357,3 +358,7 @@ function saveProgress(isCorrect) {
     cursor: pointer;
 }
 </style>
+<?php
+$content = ob_get_clean();
+include '../../includes/game_layout.php';
+?>

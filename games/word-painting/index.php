@@ -84,6 +84,7 @@ $game_data = [
     'level' => $level
 ];
 
+$content = ''; // Se generará en view.php
 include 'view.php';
 
 // Función para generar letras aleatorias que no estén en la palabra

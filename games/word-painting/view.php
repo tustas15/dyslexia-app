@@ -19,6 +19,8 @@ foreach ($letters as $letter) {
 }
 ?>
 
+<?php ob_start(); ?>
+
 <div class="game-container painting">
   <h1>Pintando Palabras <small>Nivel <?= $level ?></small></h1>
   
@@ -442,4 +444,9 @@ document.getElementById('next-btn').addEventListener('click', () => {
     font-size: 1.1rem;
     cursor: pointer;
 }
-</style>w
+</style>
+
+<?php
+$content = ob_get_clean();
+include '../../includes/game_layout.php';
+?>

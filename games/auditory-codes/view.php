@@ -1,5 +1,5 @@
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<?php ob_start(); ?>
+
 
 <div class="max-w-3xl mx-auto px-4 py-10">
     <h1 class="text-2xl sm:text-3xl font-bold text-center text-blue-700 mb-6">
@@ -37,7 +37,10 @@
         </button>
     </div>
 </div>
-
+<?php
+$content = ob_get_clean();
+include '../../includes/game_layout.php';
+?>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
 <script>
     const wordAudio = new Howl({

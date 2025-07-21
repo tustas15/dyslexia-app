@@ -1,3 +1,4 @@
+<?php ob_start(); ?>
 <div class="game-container detective">
   <h1>Detective de Letras <small>Nivel <?= $game_data['level'] ?></small></h1>
   <p class="instructions">Selecciona la letra que está escrita correctamente</p>
@@ -315,3 +316,7 @@ updateProgress();
     }
 }
 </style>
+<?php
+$content = ob_get_clean();
+include '../../includes/game_layout.php';
+?>

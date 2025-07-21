@@ -56,4 +56,5 @@ $game_data = [
     'level' => $level
 ];
 
+$content = ''; // Se generará en view.php
 include 'view.php';
