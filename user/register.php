@@ -32,197 +32,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Registro - Dyslexia App</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .register-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 80vh;
-        }
-        
-        .register-form {
-            background-color: white;
-            border-radius: 20px;
-            padding: 2.5rem;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 500px;
-        }
-        
-        .register-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .register-header h1 {
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-        
-        .register-header p {
-            color: var(--dark);
-            opacity: 0.8;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-            color: var(--dark);
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-family: 'OpenDyslexic', Arial, sans-serif;
-            transition: border-color 0.3s;
-        }
-        
-        .form-group input:focus {
-            border-color: var(--primary);
-            outline: none;
-        }
-        
-        .register-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 2rem;
-        }
-        
-        .register-actions a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-        
-        .register-actions a:hover {
-            text-decoration: underline;
-        }
-        
-        .error-message {
-            background-color: rgba(244, 67, 54, 0.1);
-            color: var(--error);
-            padding: 1rem;
-            border-radius: 10px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-        
-        .success-message {
-            background-color: rgba(76, 175, 80, 0.1);
-            color: var(--success);
-            padding: 1rem;
-            border-radius: 10px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-        
-        .age-info {
-            background-color: rgba(78, 137, 174, 0.1);
-            padding: 1rem;
-            border-radius: 10px;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-        }
-        
-        .register-image {
-            text-align: center;
-            margin-top: 1.5rem;
-        }
-        
-        .register-image img {
-            max-width: 200px;
-            opacity: 0.8;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
-<body>
-    <header>
-        <h1><i class="fas fa-book-open"></i> Dyslexia App</h1>
-    </header>
-    
-    <main class="register-container">
-        <div class="register-form">
-            <div class="register-header">
-                <h1>Crear Cuenta</h1>
-                <p>Regístrate para comenzar a jugar y aprender</p>
+
+<body class="bg-gray-100 font-sans">
+    <main class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-8">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-blue-600"><i class="fas fa-book-open mr-2 mb-7"></i>Dyslexia App</h1>
+                <h2 class="text-2xl font-bold text-blue-600">Registro</h2>
+                <p class="text-gray-600 mt-1">¡Regístrate para comenzar a jugar y aprender!</p>
             </div>
-            
+
             <?php if ($error): ?>
-                <div class="error-message">
+                <div class="bg-red-100 text-red-700 p-4 rounded-lg mb-4 flex items-center space-x-2">
                     <i class="fas fa-exclamation-circle"></i>
-                    <p><?= $error ?></p>
+                    <span><?= $error ?></span>
                 </div>
             <?php endif; ?>
-            
+
             <?php if ($success): ?>
-                <div class="success-message">
+                <div class="bg-green-100 text-green-700 p-4 rounded-lg mb-4 flex items-center space-x-2">
                     <i class="fas fa-check-circle"></i>
-                    <p><?= $success ?></p>
+                    <span><?= $success ?></span>
                 </div>
-                <div class="register-actions">
-                    <a href="login.php">Iniciar Sesión</a>
+                <div class="text-center">
+                    <a href="login.php" class="text-blue-600 hover:underline">Iniciar sesión</a>
                 </div>
             <?php else: ?>
-                <form method="POST">
-                    <div class="form-group">
-                        <label for="username">Usuario</label>
-                        <input type="text" id="username" name="username" required placeholder="Elige un nombre de usuario">
+                <form method="POST" class="space-y-5">
+                    <div>
+                        <label for="username" class="block text-gray-700 font-semibold mb-1">Usuario</label>
+                        <input type="text" id="username" name="username" required placeholder="Elige un nombre de usuario"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="password">Contraseña</label>
-                        <input type="password" id="password" name="password" required placeholder="Crea una contraseña segura">
+
+                    <div>
+                        <label for="password" class="block text-gray-700 font-semibold mb-1">Contraseña</label>
+                        <input type="password" id="password" name="password" required placeholder="Crea una contraseña"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="confirm_password">Confirmar Contraseña</label>
-                        <input type="password" id="confirm_password" name="confirm_password" required placeholder="Repite tu contraseña">
+
+                    <div>
+                        <label for="confirm_password" class="block text-gray-700 font-semibold mb-1">Confirmar Contraseña</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required placeholder="Repite la contraseña"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="age">Edad</label>
-                        <input type="number" id="age" name="age" min="5" max="12" required placeholder="¿Cuántos años tienes?">
-                        <div class="age-info">
+
+                    <div>
+                        <label for="age" class="block text-gray-700 font-semibold mb-1">Edad</label>
+                        <input type="number" id="age" name="age" min="5" max="12" required placeholder="¿Cuántos años tienes?"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                        <div class="bg-blue-100 text-blue-700 p-2 mt-2 rounded-md text-sm flex items-center gap-2">
                             <i class="fas fa-info-circle"></i>
-                            La aplicación está diseñada para niños entre 5 y 12 años
+                            <span>La aplicación está diseñada para niños entre 5 y 12 años.</span>
                         </div>
                     </div>
-                    
-                    <div class="register-actions">
-                        <a href="login.php">¿Ya tienes cuenta? Inicia sesión</a>
-                        <button type="submit">Registrarse</button>
+
+                    <div class="flex items-center justify-between">
+                        <a href="login.php" class="text-sm text-blue-600 hover:underline">¿Ya tienes cuenta? Inicia sesión</a>
+                        <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200">
+                            Registrarse
+                        </button>
                     </div>
                 </form>
             <?php endif; ?>
-            
-            <div class="register-image">
-                <img src="../assets/images/register.svg" alt="Niños aprendiendo">
+
+            <div class="text-center mt-6">
+                <img src="../assets/images/register.svg" alt="Niños aprendiendo" class="w-40 mx-auto opacity-80">
             </div>
         </div>
     </main>
-    
-    <footer>
-        <p>Dyslexia App &copy; <?= date('Y') ?></p>
+
+    <footer class="text-center py-4 text-sm text-gray-500">
+        Dyslexia App &copy; <?= date('Y') ?>
     </footer>
 </body>
+
 </html>
