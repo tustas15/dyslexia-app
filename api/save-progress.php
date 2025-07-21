@@ -22,23 +22,45 @@ if (!$data) {
 
 $user_id = $_SESSION['user_id'];
 $game_type = $data['game'] ?? '';
-$correct = $data['correct'] ?? false;
 $level = $data['level'] ?? 1;
-$word = $data['word'] ?? '';
 
 if (empty($game_type)) {
     echo json_encode(['success' => false, 'error' => 'Tipo de juego no especificado']);
     exit;
 }
 
-// Calcular puntuación
-$score = $correct ? 10 : 0;
-$details = json_encode([
-    'level' => $level,
-    'word' => $word,
-    'correct' => $correct,
-    'timestamp' => date('Y-m-d H:i:s')
-]);
+// Calcular puntuación para Detective de Letras
+if ($game_type === 'letter-detective') {
+    if (isset($data['final_score'])) {
+        // Guardar puntuación final
+        $score = $data['final_score'];
+        $details = json_encode([
+            'level' => $level,
+            'score' => $score,
+            'correct_answers' => $data['correct_answers'] ?? 0,
+            'total_pairs' => $data['total_pairs'] ?? 0,
+            'timestamp' => date('Y-m-d H:i:s')
+        ]);
+    } else {
+        // Guardar progreso por cada respuesta
+        $score = $data['correct'] ? 2 : 0;
+        $details = json_encode([
+            'level' => $level,
+            'correct' => $data['correct'],
+            'selected' => $data['selected'] ?? '',
+            'correct_letter' => $data['correctLetter'] ?? '',
+            'timestamp' => date('Y-m-d H:i:s')
+        ]);
+        
+    }
+    
+} else {
+    // Lógica para otros juegos
+    $score = $data['correct'] ? 10 : 0;
+    $details = json_encode($data);
+}
+
+
 
 // Guardar en la base de datos
 $stmt = $db->prepare("INSERT INTO user_progress 
