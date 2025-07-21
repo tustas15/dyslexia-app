@@ -1,0 +1,299 @@
+/* Estilos específicos para juegos */
+
+/* Rompecódigos Auditivos */
+.auditory-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.auditory-option {
+    padding: 1.5rem;
+    background-color: var(--light);
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auditory-option:hover {
+    background-color: rgba(78, 137, 174, 0.1);
+}
+
+.audio-control {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.audio-btn {
+    font-size: 2rem;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--accent);
+}
+
+/* Caza Sílabas */
+.syllables-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.syllable {
+    background-color: var(--light);
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    font-size: 1.5rem;
+    cursor: move;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.drop-zone {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem 0;
+    min-height: 80px;
+}
+
+.slot {
+    width: 100px;
+    height: 80px;
+    border: 2px dashed var(--primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(78, 137, 174, 0.05);
+}
+
+/* Pintando Palabras */
+.painting-canvas {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.letter-box {
+    width: 60px;
+    height: 80px;
+    border: 2px solid var(--dark);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0.3rem;
+    cursor: pointer;
+    background-color: white;
+}
+
+.color-palette {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.color {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.color.selected {
+    border-color: var(--dark);
+    transform: scale(1.2);
+}
+
+.red { background-color: #ff6b6b; }
+.blue { background-color: #4d96ff; }
+.green { background-color: #6bc77; }
+.yellow { background-color: #ffd93d; }
+
+/* Detective de Letras */
+.letter-pairs {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.pair {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+}
+
+.letter {
+    font-size: 5rem;
+    padding: 1rem 2rem;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: var(--light);
+}
+
+.letter:hover {
+    transform: scale(1.1);
+    background-color: rgba(78, 137, 174, 0.1);
+}
+
+/* Cuento Interactivo */
+.story-container {
+    background-color: var(--light);
+    padding: 2rem;
+    border-radius: 15px;
+    margin: 2rem 0;
+    min-height: 200px;
+}
+
+.story-segment {
+    margin: 1rem 0;
+    font-size: 1.2rem;
+    line-height: 1.8;
+}
+
+.editable {
+    background-color: rgba(237, 102, 99, 0.1);
+    padding: 0.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    min-height: 40px;
+}
+
+.story-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.story-item {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    text-align: center;
+    cursor: move;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.story-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+}
+
+.story-item img {
+    max-width: 100%;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+}
+
+/* Palabrabot */
+.robot-container {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.robot-character {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+}
+
+.robot-character img {
+    max-width: 100%;
+    transition: all 0.3s ease;
+}
+
+.speech-bubble {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 20px;
+    position: relative;
+    max-width: 80%;
+    margin: 0 auto 2rem;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    font-size: 1.5rem;
+}
+
+.speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 10px solid transparent;
+    border-top-color: white;
+}
+
+.correction-panel {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.correction-panel input {
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    border: 2px solid var(--primary);
+    font-size: 1.2rem;
+    font-family: 'OpenDyslexic', Arial, sans-serif;
+    min-width: 250px;
+}
+
+/* Saltarima */
+.platform-game {
+    position: relative;
+    height: 400px;
+    background-color: #87CEEB;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 2rem 0;
+}
+
+.platform {
+    position: absolute;
+    width: 100px;
+    height: 30px;
+    background-color: #8BC34A;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.platform:hover {
+    background-color: #7CB342;
+}
+
+.character {
+    position: absolute;
+    bottom: 0;
+    left: 50px;
+    font-size: 3rem;
+    z-index: 10;
+    transition: bottom 0.5s ease;
+}
