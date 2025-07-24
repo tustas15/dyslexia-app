@@ -1,11 +1,26 @@
 <?php ob_start(); ?>
 
-
 <div class="max-w-3xl mx-auto px-4 py-10">
-    <h1 class="text-2xl sm:text-3xl font-bold text-center text-blue-700 mb-6">
-        Rompecódigos Auditivos
-        <small class="text-sm sm:text-base block text-gray-600 mt-2">Nivel <?= $game_data['level'] ?></small>
-    </h1>
+    <div class="game-header flex flex-wrap justify-between items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-blue-700">Rompecódigos Auditivos</h1>
+            <p class="text-gray-600">Nivel <?= $game_data['level'] ?></p>
+        </div>
+        
+        <div class="progress-container bg-blue-50 p-3 rounded-lg">
+            <div class="flex justify-between mb-2">
+                <span class="text-blue-700 font-medium">Progreso</span>
+                <span class="text-blue-700 font-bold">
+                    <?= $game_data['words_completed'] ?>/<?= $game_data['words_per_level'] ?>
+                </span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div class="bg-blue-600 h-3 transition-all duration-500" 
+                     style="width: <?= ($game_data['words_completed'] / $game_data['words_per_level']) * 100 ?>%">
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Botón de audio -->
     <div class="flex justify-center mb-8">
@@ -29,10 +44,10 @@
     <!-- Feedback -->
     <div class="feedback text-center hidden">
         <div class="feedback-content mb-4">
-<span class="result-icon flex items-center justify-center w-16 h-16 rounded-full text-3xl mx-auto mb-3"></span>
+            <span class="result-icon flex items-center justify-center w-16 h-16 rounded-full text-3xl mx-auto mb-3"></span>
             <p class="message text-lg font-medium text-gray-700"></p>
         </div>
-        <button class="next-btn hidden bg-green-500 text-white text-lg px-6 py-3 rounded-lg shadow hover:bg-green-600 transition w-full max-w-xs sm:max-w-none" onclick="location.reload()">
+        <button class="next-btn bg-green-500 text-white text-lg px-6 py-3 rounded-lg shadow hover:bg-green-600 transition w-full max-w-xs sm:max-w-none">
             Siguiente palabra
         </button>
     </div>
@@ -66,6 +81,9 @@ include '../../includes/game_layout.php';
 
         const resultIcon = document.querySelector('.result-icon');
         const message = document.querySelector('.message');
+        const feedback = document.querySelector('.feedback');
+        const nextBtn = document.querySelector('.next-btn');
+        
         resultIcon.className = 'result-icon ' + (isCorrect ? 'correct' : 'incorrect');
         resultIcon.innerHTML = isCorrect ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
 
@@ -73,26 +91,34 @@ include '../../includes/game_layout.php';
             '¡Correcto! La palabra es <?= htmlspecialchars($game_data['word']) ?>' :
             'Incorrecto. La palabra correcta es "<?= htmlspecialchars($game_data['word']) ?>"';
 
-        const feedback = document.querySelector('.feedback');
         feedback.classList.remove('hidden');
-
-        const nextBtn = document.querySelector('.next-btn');
         nextBtn.classList.remove('hidden');
 
-        fetch('/api/save-progress.php', {
+        // Guardar progreso
+        fetch('../../api/save-progress.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 game: 'auditory-codes',
                 correct: isCorrect,
                 level: <?= $game_data['level'] ?>,
-                word: '<?= $game_data['word'] ?>'
+                word: '<?= $game_data['word'] ?>',
+                selected: btn.textContent
             })
         });
     }
+
+    // Manejar siguiente palabra
+    document.querySelector('.next-btn').addEventListener('click', () => {
+        location.reload(); // Recargar para nueva palabra
+    });
 </script>
 
 <style>
+    .progress-container {
+        min-width: 200px;
+    }
+    
     .option {
         font-family: 'OpenDyslexic', sans-serif;
         cursor: pointer;

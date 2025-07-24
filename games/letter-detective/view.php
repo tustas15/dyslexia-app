@@ -1,322 +1,236 @@
 <?php ob_start(); ?>
-<div class="game-container detective">
-  <h1>Detective de Letras <small>Nivel <?= $game_data['level'] ?></small></h1>
-  <p class="instructions">Selecciona la letra que está escrita correctamente</p>
-  
-  <div class="progress-bar">
-    <div class="progress-fill" id="progress-fill"></div>
-  </div>
-  
-  <div class="letter-pairs">
-    <?php foreach($game_data['pairs'] as $index => $pair): ?>
-      <div class="pair" data-pair-id="<?= $pair['id'] ?>" <?= $index > 0 ? 'style="display:none;"' : '' ?>>
-        <div class="letter" data-letter="<?= $pair['letter1'] ?>" 
-             onclick="checkLetter(this, '<?= $pair['letter1'] ?>', '<?= $pair['correct'] ?>')">
-          <?= $pair['letter1'] ?>
+
+<div class="max-w-3xl mx-auto px-4 py-10">
+    <div class="game-header flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-blue-700">Detective de Letras</h1>
+            <p class="text-gray-600">Nivel <?= $game_data['level'] ?></p>
         </div>
-        <div class="vs">VS</div>
-        <div class="letter" data-letter="<?= $pair['letter2'] ?>" 
-             onclick="checkLetter(this, '<?= $pair['letter2'] ?>', '<?= $pair['correct'] ?>')">
-          <?= $pair['letter2'] ?>
+        <div class="stats flex gap-4">
+            <div class="bg-blue-100 px-4 py-2 rounded-lg">
+                <span class="text-blue-700 font-bold" id="score">0</span> pts
+            </div>
+            <div class="bg-red-100 px-4 py-2 rounded-lg">
+                <span class="text-red-700 font-bold" id="lives">3</span> vidas
+            </div>
         </div>
-      </div>
-    <?php endforeach; ?>
-  </div>
-  
-  <div class="feedback">
-    <div class="result-icon"></div>
-    <p class="message"></p>
-    <button class="next-btn hidden" onclick="nextPair()">Siguiente</button>
-  </div>
+    </div>
+
+    <div class="game-container bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h2 class="text-xl font-bold text-center mb-8">Selecciona la letra correcta:</h2>
+        
+        <div class="letters flex justify-center gap-8 mb-8">
+            <button class="letter-btn text-8xl w-40 h-40 border-4 border-blue-400 rounded-xl bg-white hover:bg-blue-50 transition" 
+                     data-letter="<?= $game_data['pairs'][0]['letter1'] ?>">
+                <?= $game_data['pairs'][0]['letter1'] ?>
+            </button>
+            <button class="letter-btn text-8xl w-40 h-40 border-4 border-blue-400 rounded-xl bg-white hover:bg-blue-50 transition" 
+                     data-letter="<?= $game_data['pairs'][0]['letter2'] ?>">
+                <?= $game_data['pairs'][0]['letter2'] ?>
+            </button>
+        </div>
+
+        <div class="text-center">
+            <p class="text-gray-500 mb-4">Pares completados: <span id="progress">0</span>/10</p>
+            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                <div id="progress-bar" class="bg-blue-600 h-4 transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="feedback hidden text-center mb-8">
+        <div class="feedback-content p-4 rounded-lg mb-4">
+            <span class="result-icon flex items-center justify-center w-16 h-16 rounded-full text-3xl mx-auto mb-3"></span>
+            <p class="message text-lg font-medium text-gray-700"></p>
+        </div>
+        <button class="next-btn bg-blue-500 text-white text-lg px-6 py-3 rounded-lg shadow hover:bg-blue-600 transition">
+            Siguiente par
+        </button>
+    </div>
+
+    <div class="level-complete hidden text-center p-8 bg-green-50 rounded-xl">
+        <h2 class="text-2xl font-bold text-green-700 mb-4">¡Nivel Completado!</h2>
+        <p class="text-lg mb-6">Puntuación: <span id="final-score">0</span> puntos</p>
+        <div class="flex justify-center gap-4">
+            <button id="replay-btn" class="bg-blue-500 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-600 transition">
+                Repetir nivel
+            </button>
+            <?php if ($game_data['level'] < 3): ?>
+                <button id="next-level-btn" class="bg-green-500 text-white px-6 py-3 rounded-lg shadow hover:bg-green-600 transition">
+                    Siguiente nivel
+                </button>
+            <?php else: ?>
+                <button id="return-btn" class="bg-gray-500 text-white px-6 py-3 rounded-lg shadow hover:bg-gray-600 transition">
+                    Volver al inicio
+                </button>
+            <?php endif; ?>
+        </div>
+    </div>
 </div>
 
-<script>
-let currentPairIndex = 0;
-const pairs = document.querySelectorAll('.pair');
-const totalPairs = pairs.length;
-let correctAnswers = 0;
-
-// Actualizar barra de progreso
-function updateProgress() {
-    const progressFill = document.getElementById('progress-fill');
-    const progress = (currentPairIndex / totalPairs) * 100;
-    progressFill.style.width = `${progress}%`;
-}
-
-function checkLetter(element, letter, correctLetter) {
-    const isCorrect = (letter === correctLetter);
-    
-    // Feedback visual
-    if (isCorrect) {
-        element.classList.add('correct');
-        element.classList.remove('incorrect');
-        correctAnswers++;
-    } else {
-        element.classList.add('incorrect');
-        element.classList.remove('correct');
-        
-        // Marcar la correcta
-        const correctElement = element.parentElement.querySelector(`.letter[data-letter="${correctLetter}"]`);
-        correctElement.classList.add('correct');
-    }
-    
-    // Deshabilitar clics
-    const letters = element.parentElement.querySelectorAll('.letter');
-    letters.forEach(letter => {
-        letter.style.cursor = 'default';
-        letter.onclick = null;
-    });
-    
-    // Mostrar feedback
-    const resultIcon = document.querySelector('.result-icon');
-    const message = document.querySelector('.message');
-    const nextBtn = document.querySelector('.next-btn');
-    
-    resultIcon.className = 'result-icon ' + (isCorrect ? 'correct' : 'incorrect');
-    resultIcon.innerHTML = isCorrect ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
-    message.textContent = isCorrect ? 
-        '¡Correcto! La letra "' + correctLetter + '" está bien escrita' : 
-        '¡Incorrecto! La letra correcta es "' + correctLetter + '"';
-    nextBtn.classList.remove('hidden');
-    
-    // Guardar progreso
-    saveProgress(isCorrect, '<?= $game_data['level'] ?>', letter, correctLetter);
-}
-
-function nextPair() {
-    currentPairIndex++;
-    
-    if (currentPairIndex < totalPairs) {
-        // Ocultar el par actual
-        pairs[currentPairIndex - 1].style.display = 'none';
-        
-        // Mostrar el siguiente par
-        pairs[currentPairIndex].style.display = 'flex';
-        
-        // Resetear estilos
-        const letters = pairs[currentPairIndex].querySelectorAll('.letter');
-        letters.forEach(letter => {
-            letter.classList.remove('correct', 'incorrect');
-            letter.style.cursor = 'pointer';
-        });
-        
-        // Ocultar feedback
-        document.querySelector('.result-icon').className = 'result-icon';
-        document.querySelector('.message').textContent = '';
-        document.querySelector('.next-btn').classList.add('hidden');
-        
-        // Actualizar progreso
-        updateProgress();
-    } else {
-        // Fin del juego
-        const score = Math.round((correctAnswers / totalPairs) * 100);
-        const message = document.querySelector('.message');
-        message.innerHTML = `¡Felicidades!<br>Completaste ${correctAnswers} de ${totalPairs} correctamente.<br>Puntuación: ${score}%`;
-        
-        // Guardar puntuación final
-        saveFinalScore(score);
-        
-        // Mostrar botón de volver
-        const nextBtn = document.querySelector('.next-btn');
-        nextBtn.textContent = 'Volver al Menú';
-        nextBtn.onclick = function() {
-            window.location.href = '../../index.php';
-        };
-        
-        // Ocultar el par actual
-        pairs[currentPairIndex - 1].style.display = 'none';
-    }
-}
-
-function saveProgress(isCorrect, level, selected, correct) {
-    fetch('/api/save-progress.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            game: 'letter-detective',
-            level: level,
-            correct: isCorrect,
-            selected: selected,
-            correctLetter: correct
-        })
-    });
-}
-
-function saveFinalScore(score) {
-    fetch('/api/save-progress.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            game: 'letter-detective',
-            level: <?= $game_data['level'] ?>,
-            final_score: score,
-            correct_answers: correctAnswers,
-            total_pairs: totalPairs
-        })
-    });
-}
-
-// Inicializar barra de progreso
-updateProgress();
-</script>
-
-<style>
-.game-container.detective {
-    max-width: 600px;
-    margin: 0 auto;
-    text-align: center;
-    padding: 20px;
-}
-
-.instructions {
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-    color: #43658b;
-}
-
-.progress-bar {
-    height: 20px;
-    background-color: #e3f2fd;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background-color: #4e89ae;
-    border-radius: 10px;
-    width: 0%;
-    transition: width 0.5s ease;
-}
-
-.letter-pairs {
-    margin-top: 30px;
-}
-
-.pair {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 30px;
-    margin-bottom: 30px;
-}
-
-.letter {
-    width: 150px;
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 5rem;
-    font-weight: bold;
-    border: 4px solid #4e89ae;
-    border-radius: 15px;
-    cursor: pointer;
-    background-color: white;
-    transition: all 0.3s;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.letter:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-}
-
-.letter.correct {
-    background-color: #d4edda;
-    border-color: #28a745;
-    color: #28a745;
-    box-shadow: 0 0 20px rgba(40, 167, 69, 0.4);
-}
-
-.letter.incorrect {
-    background-color: #f8d7da;
-    border-color: #dc3545;
-    color: #dc3545;
-}
-
-.vs {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #ed6663;
-}
-
-.feedback {
-    margin-top: 30px;
-    padding: 20px;
-    border-radius: 15px;
-    background-color: #f8f9fa;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-}
-
-.result-icon {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.result-icon.correct {
-    background-color: #d4edda;
-    color: #28a745;
-}
-
-.result-icon.incorrect {
-    background-color: #f8d7da;
-    color: #dc3545;
-}
-
-.message {
-    font-size: 1.3rem;
-    margin-bottom: 20px;
-    line-height: 1.6;
-}
-
-.next-btn {
-    background-color: #4e89ae;
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 50px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    min-width: 150px;
-}
-
-.next-btn:hover {
-    background-color: #43658b;
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-@media (max-width: 600px) {
-    .pair {
-        flex-direction: column;
-        gap: 20px;
-    }
-    
-    .letter {
-        width: 120px;
-        height: 120px;
-        font-size: 4rem;
-    }
-    
-    .vs {
-        transform: rotate(90deg);
-    }
-}
-</style>
 <?php
 $content = ob_get_clean();
 include '../../includes/game_layout.php';
 ?>
+
+<script>
+    const gameData = <?= json_encode($game_data) ?>;
+    let currentPair = 0;
+    let score = 0;
+    let lives = gameData.lives;
+    let pairsCompleted = 0;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateGameStats();
+        
+        document.querySelectorAll('.letter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                checkAnswer(this.dataset.letter);
+            });
+        });
+
+        document.querySelector('.next-btn').addEventListener('click', nextPair);
+        document.querySelector('#replay-btn').addEventListener('click', () => location.reload());
+        document.querySelector('#next-level-btn').addEventListener('click', () => {
+            location.href = `?level=${gameData.level + 1}`;
+        });
+        document.querySelector('#return-btn').addEventListener('click', () => {
+            location.href = '../../index.php';
+        });
+    });
+
+    function checkAnswer(selectedLetter) {
+        const correctLetter = gameData.pairs[currentPair].correct_letter;
+        const isCorrect = selectedLetter === correctLetter;
+        
+        // Actualizar estado del juego
+        if (isCorrect) {
+            score += gameData.level * 5; // Más puntos en niveles más altos
+            pairsCompleted++;
+            showFeedback(true, correctLetter);
+        } else {
+            lives--;
+            showFeedback(false, correctLetter);
+        }
+        
+        // Deshabilitar botones
+        document.querySelectorAll('.letter-btn').forEach(btn => {
+            btn.disabled = true;
+            if (btn.dataset.letter === correctLetter) {
+                btn.classList.add('border-green-500', 'bg-green-50');
+            } else if (btn.dataset.letter === selectedLetter && !isCorrect) {
+                btn.classList.add('border-red-500', 'bg-red-50');
+            }
+        });
+        
+        updateGameStats();
+    }
+
+    function showFeedback(isCorrect, correctLetter) {
+        const feedback = document.querySelector('.feedback');
+        const resultIcon = document.querySelector('.result-icon');
+        const message = document.querySelector('.message');
+        
+        if (isCorrect) {
+            resultIcon.className = 'result-icon bg-green-100 text-green-500';
+            resultIcon.innerHTML = '<i class="fas fa-check"></i>';
+            message.textContent = '¡Correcto! Has seleccionado la letra correcta.';
+        } else {
+            resultIcon.className = 'result-icon bg-red-100 text-red-500';
+            resultIcon.innerHTML = '<i class="fas fa-times"></i>';
+            message.textContent = `Incorrecto. La letra correcta era "${correctLetter}".`;
+        }
+        
+        feedback.classList.remove('hidden');
+    }
+
+    function nextPair() {
+        currentPair++;
+        
+        // Verificar si el juego ha terminado
+        if (lives <= 0 || currentPair >= gameData.pairs.length || pairsCompleted >= 10) {
+            endGame();
+            return;
+        }
+        
+        // Actualizar la interfaz para el próximo par
+        document.querySelectorAll('.letter-btn').forEach((btn, index) => {
+            btn.disabled = false;
+            btn.classList.remove('border-green-500', 'bg-green-50', 'border-red-500', 'bg-red-50');
+            btn.dataset.letter = gameData.pairs[currentPair][`letter${index+1}`];
+            btn.textContent = gameData.pairs[currentPair][`letter${index+1}`];
+        });
+        
+        document.querySelector('.feedback').classList.add('hidden');
+        updateGameStats();
+    }
+
+    function endGame() {
+        // Guardar progreso
+        saveProgress();
+        
+        // Mostrar pantalla de finalización
+        document.querySelector('.game-container').classList.add('hidden');
+        document.querySelector('.feedback').classList.add('hidden');
+        document.querySelector('.level-complete').classList.remove('hidden');
+        document.querySelector('#final-score').textContent = score;
+    }
+
+    function updateGameStats() {
+        document.querySelector('#score').textContent = score;
+        document.querySelector('#lives').textContent = lives;
+        document.querySelector('#progress').textContent = pairsCompleted;
+        document.querySelector('#progress-bar').style.width = `${(pairsCompleted / 10) * 100}%`;
+    }
+
+    function saveProgress() {
+        const gameType = 'letter-detective';
+        
+        // Guardar puntuación final
+        fetch('../../api/save-progress.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                game: gameType,
+                level: gameData.level,
+                final_score: score,
+                correct_answers: pairsCompleted,
+                total_pairs: gameData.pairs.length,
+                lives_remaining: lives
+            })
+        });
+    }
+</script>
+
+<style>
+    .letter-btn {
+        font-family: 'OpenDyslexic', sans-serif;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .letter-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .letter-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+    
+    .feedback {
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .level-complete {
+        animation: scaleIn 0.5s forwards;
+    }
+    
+    @keyframes scaleIn {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+</style>

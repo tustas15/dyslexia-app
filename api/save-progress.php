@@ -39,6 +39,7 @@ if ($game_type === 'letter-detective') {
             'score' => $score,
             'correct_answers' => $data['correct_answers'] ?? 0,
             'total_pairs' => $data['total_pairs'] ?? 0,
+            'lives_remaining' => $data['lives_remaining'] ?? 0,
             'timestamp' => date('Y-m-d H:i:s')
         ]);
     } else {
@@ -51,15 +52,29 @@ if ($game_type === 'letter-detective') {
             'correct_letter' => $data['correctLetter'] ?? '',
             'timestamp' => date('Y-m-d H:i:s')
         ]);
-        
     }
-    
+} else if ($game_type === 'auditory-codes') {
+    $score = $data['correct'] ? 10 : 0;
+    $details = json_encode([
+        'level' => $level,
+        'correct' => $data['correct'],
+        'word' => $data['word'] ?? '',
+        'selected' => $data['selected'] ?? '',
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
+} else if ($game_type === 'interactive-story') {
+    $score = $data['completed'] ? 50 : 0; // 50 puntos por historia completada
+    $details = json_encode([
+        'level' => $level,
+        'story_id' => $data['story_id'] ?? 0,
+        'completed' => $data['completed'] ?? false,
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
 } else {
     // Lógica para otros juegos
     $score = $data['correct'] ? 10 : 0;
     $details = json_encode($data);
 }
-
 
 
 // Guardar en la base de datos

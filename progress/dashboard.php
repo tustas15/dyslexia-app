@@ -40,7 +40,8 @@ $game_names = [
     'letter-detective' => 'Detective de Letras',
     'interactive-story' => 'Cuento Interactivo',
     'word-robot' => 'Palabrabot',
-    'rhyme-platform' => 'Saltarima'
+    'rhyme-platform' => 'Saltarima',
+    'letter-detective' => 'Detective de Letras',
 ];
 ?>
 <!DOCTYPE html>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-07-2025 a las 04:20:47
+-- Tiempo de generación: 21-07-2025 a las 22:55:04
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -121,7 +121,37 @@ INSERT INTO `game_options` (`id`, `word_id`, `option_text`, `is_correct`, `game_
 (79, 9, 'ventanilla', 0, 'auditory-codes'),
 (80, 10, 'elefante', 1, 'auditory-codes'),
 (81, 10, 'elegante', 0, 'auditory-codes'),
-(82, 10, 'elefantes', 0, 'auditory-codes');
+(82, 10, 'elefantes', 0, 'auditory-codes'),
+(83, 1, 'sapato', 0, 'word-robot'),
+(84, 1, 'zapato', 1, 'word-robot'),
+(85, 1, 'capato', 0, 'word-robot'),
+(86, 2, 'caza', 0, 'word-robot'),
+(87, 2, 'casa', 1, 'word-robot'),
+(88, 2, 'tasa', 0, 'word-robot'),
+(89, 3, 'col', 0, 'word-robot'),
+(90, 3, 'sol', 1, 'word-robot'),
+(91, 3, 'sal', 0, 'word-robot'),
+(92, 4, 'fror', 0, 'word-robot'),
+(93, 4, 'flor', 1, 'word-robot'),
+(94, 4, 'flol', 0, 'word-robot'),
+(95, 5, 'bato', 0, 'word-robot'),
+(96, 5, 'pato', 1, 'word-robot'),
+(97, 5, 'plato', 0, 'word-robot'),
+(98, 6, 'pero', 0, 'word-robot'),
+(99, 6, 'perro', 1, 'word-robot'),
+(100, 6, 'pero', 0, 'word-robot'),
+(101, 7, 'libo', 0, 'word-robot'),
+(102, 7, 'libro', 1, 'word-robot'),
+(103, 7, 'libre', 0, 'word-robot'),
+(104, 8, 'silla', 1, 'word-robot'),
+(105, 8, 'sillla', 0, 'word-robot'),
+(106, 8, 'siya', 0, 'word-robot'),
+(107, 9, 'ventana', 1, 'word-robot'),
+(108, 9, 'bentana', 0, 'word-robot'),
+(109, 9, 'ventaña', 0, 'word-robot'),
+(110, 10, 'elefante', 1, 'word-robot'),
+(111, 10, 'elegante', 0, 'word-robot'),
+(112, 10, 'elefante', 0, 'word-robot');
 
 -- --------------------------------------------------------
 
@@ -171,7 +201,22 @@ INSERT INTO `letter_pairs` (`id`, `letter1`, `letter2`, `correct_letter`, `diffi
 (27, 'g', 'q', 'g', 'hard'),
 (28, 'r', 'v', 'r', 'hard'),
 (29, 's', 'z', 's', 'hard'),
-(30, 'c', 'e', 'c', 'hard');
+(30, 'c', 'e', 'c', 'hard'),
+(31, 'b', 'd', 'b', 'easy'),
+(32, 'p', 'q', 'p', 'easy'),
+(33, 'm', 'n', 'm', 'easy'),
+(34, 'u', 'n', 'u', 'easy'),
+(35, 'a', 'o', 'a', 'easy'),
+(36, 'b', 'd', 'd', 'medium'),
+(37, 'p', 'q', 'q', 'medium'),
+(38, 'm', 'n', 'n', 'medium'),
+(39, 'u', 'n', 'n', 'medium'),
+(40, 'a', 'o', 'o', 'medium'),
+(41, 'ñ', 'n', 'ñ', 'hard'),
+(42, 'g', 'q', 'g', 'hard'),
+(43, 'r', 'v', 'r', 'hard'),
+(44, 's', 'z', 's', 'hard'),
+(45, 'c', 'e', 'c', 'hard');
 
 -- --------------------------------------------------------
 
@@ -468,13 +513,13 @@ ALTER TABLE `words`
 -- AUTO_INCREMENT de la tabla `game_options`
 --
 ALTER TABLE `game_options`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=113;
 
 --
 -- AUTO_INCREMENT de la tabla `letter_pairs`
 --
 ALTER TABLE `letter_pairs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT de la tabla `rhymes`

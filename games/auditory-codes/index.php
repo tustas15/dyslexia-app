@@ -11,15 +11,34 @@ if (!is_logged_in()) {
     exit;
 }
 
+$user_id = $_SESSION['user_id'];
 $level = $_GET['level'] ?? 1;
 
-// Convertir nivel numérico a dificultad textual
-$difficulty_map = [
-    1 => 'easy',
-    2 => 'medium',
-    3 => 'hard'
-];
-$difficulty = $difficulty_map[$level] ?? 'easy';
+// Determinar dificultad según nivel
+$difficulty = 'easy';
+if ($level == 2) $difficulty = 'medium';
+elseif ($level >= 3) $difficulty = 'hard';
+
+// Obtener progreso actual del nivel
+$stmt = $db->prepare("SELECT SUM(score) AS level_score 
+                     FROM user_progress 
+                     WHERE user_id = ? 
+                     AND game_type = 'auditory-codes' 
+                     AND JSON_EXTRACT(details, '$.level') = ?"); // Cambio aquí
+$stmt->bind_param("ii", $user_id, $level);
+$stmt->execute();
+$progress = $stmt->get_result()->fetch_assoc();
+$current_score = $progress['level_score'] ?? 0;
+
+// Calcular palabras completadas en este nivel
+$words_per_level = 10;
+$words_completed = floor($current_score / 10); // Cada palabra correcta da 10 puntos
+
+// Verificar si el nivel está completo
+if ($words_completed >= $words_per_level) {
+    header("Location: level_complete.php?level=$level");
+    exit;
+}
 
 // Consulta optimizada y corregida
 $sql = "SELECT w.id, w.word, w.audio_path, 
@@ -72,7 +91,10 @@ $game_data = [
     'word' => $row['word'],
     'audio' => get_audio('auditory', $row['audio_path']),
     'options' => $options,
-    'level' => $level
+    'level' => $level,
+    'current_score' => $current_score,
+    'words_completed' => $words_completed,
+    'words_per_level' => $words_per_level
 ];
 
 $content = ''; // Se generará en view.php

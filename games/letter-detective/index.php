@@ -11,51 +11,26 @@ if (!is_logged_in()) {
     exit;
 }
 
+$user_id = $_SESSION['user_id'];
 $level = $_GET['level'] ?? 1;
 
-// Convertir nivel numérico a dificultad textual
-$difficulty_map = [
-    1 => 'easy',
-    2 => 'medium',
-    3 => 'hard'
-];
-$difficulty = $difficulty_map[$level] ?? 'easy';
+// Determinar dificultad según nivel
+$difficulty = 'easy';
+if ($level == 2) $difficulty = 'medium';
+elseif ($level >= 3) $difficulty = 'hard';
 
-// Obtener pares de letras para el nivel
-$sql = "SELECT id, letter1, letter2, correct_letter 
-        FROM letter_pairs 
-        WHERE difficulty = ? 
-        ORDER BY RAND() LIMIT 5";
-
-$stmt = $db->prepare($sql);
+// Obtener datos del juego
+$stmt = $db->prepare("SELECT * FROM letter_pairs WHERE difficulty = ? ORDER BY RAND() LIMIT 10");
 $stmt->bind_param("s", $difficulty);
 $stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows === 0) {
-    // Intentar con dificultad fácil como respaldo
-    $stmt->bind_param("s", 'easy');
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows === 0) {
-        die("No hay datos disponibles para este nivel.");
-    }
-}
-
-$pairs = [];
-while ($row = $result->fetch_assoc()) {
-    $pairs[] = [
-        'id' => $row['id'],
-        'letter1' => $row['letter1'],
-        'letter2' => $row['letter2'],
-        'correct' => $row['correct_letter']
-    ];
-}
+$letter_pairs = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 $game_data = [
-    'pairs' => $pairs,
-    'level' => $level
+    'level' => $level,
+    'pairs' => $letter_pairs,
+    'lives' => 3,
+    'score' => 0,
+    'current_pair' => 0
 ];
 
 $content = ''; // Se generará en view.php
