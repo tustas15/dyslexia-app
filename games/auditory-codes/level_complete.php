@@ -68,9 +68,9 @@ if (isset($_GET['restart'])) {
         </div>
         
         <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="index.php?level=<?= $level ?>" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition">
+            <!-- <a href="index.php?level=<?= $level ?>" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition">
                 <i class="fas fa-redo mr-2"></i> Repetir nivel
-            </a>
+            </a> -->
             
             <?php if ($next_level > $level): ?>
                 <a href="index.php?level=<?= $next_level ?>" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition">
