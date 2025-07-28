@@ -1,4 +1,5 @@
 <?php
+// index.php
 require_once '../../includes/config.php';
 require_once '../../includes/database.php';
 require_once '../../includes/auth.php';
@@ -64,15 +65,34 @@ if ($result->num_rows === 0) {
 }
 
 $story = $result->fetch_assoc();
+
+// Identificar marcadores de posición en el template PRIMERO
+preg_match_all('/\{([^}]+)\}/', $story['template'], $matches);
+$placeholders = $matches[1] ?? [];
+
+// Decodificar opciones
 $options = json_decode($story['options'], true);
-$categories = $options['categories'] ?? [];
+
+// Determinar categorías según el formato
+if (isset($options['categories'])) {
+    // Formato nuevo: usar la lista de categorías
+    $categories = $options['categories'];
+} else {
+    // Formato antiguo: usar las claves del JSON
+    $categories = array_keys($options);
+}
+
+// Filtrar categorías que están en el template
+$categories = array_intersect($categories, $placeholders);
 
 // Obtener elementos para la historia
 $elements = [];
+
+// Obtener elementos solo si existen categorías válidas
 if (!empty($categories)) {
-    $placeholders = implode(',', array_fill(0, count($categories), '?'));
+    $placeholders_str = implode(',', array_fill(0, count($categories), '?'));
     $sql = "SELECT * FROM story_elements 
-            WHERE story_id = ? AND category IN ($placeholders)";
+            WHERE story_id = ? AND category IN ($placeholders_str)";
     
     $stmt = $db->prepare($sql);
     $types = str_repeat('s', count($categories) + 1);
@@ -84,15 +104,24 @@ if (!empty($categories)) {
     while ($row = $elements_result->fetch_assoc()) {
         $elements[$row['category']][] = [
             'word' => $row['word'],
-            'image' => get_image('stories', $row['image_path']),
-            'audio' => get_audio('stories', $row['audio_path'])
+            'image_path' => $row['image_path'] // Corregido para usar image_path
         ];
     }
 }
 
-// Identificar marcadores de posición en el template
-preg_match_all('/\{([^}]+)\}/', $story['template'], $matches);
-$placeholders = $matches[1] ?? [];
+// Si no hay elementos, usar palabras del JSON (formato antiguo)
+if (empty($elements) && is_array($options)) {
+    foreach ($categories as $category) {
+        if (isset($options[$category])) {
+            foreach ($options[$category] as $word) {
+                $elements[$category][] = [
+                    'word' => $word,
+                    'image_path' => null
+                ];
+            }
+        }
+    }
+}
 
 $game_data = [
     'id' => $story['id'],
