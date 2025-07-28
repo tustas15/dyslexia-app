@@ -20,7 +20,7 @@ $stmt = $db->prepare("SELECT SUM(score) AS level_score
                      FROM user_progress 
                      WHERE user_id = ? 
                      AND game_type = 'auditory-codes' 
-                     AND JSON_EXTRACT(details, '$.level') = ?"); // Cambio aquí
+                     AND JSON_UNQUOTE(JSON_EXTRACT(details, '$.level')) = ?");
 $stmt->bind_param("ii", $user_id, $level);
 $stmt->execute();
 $progress = $stmt->get_result()->fetch_assoc();

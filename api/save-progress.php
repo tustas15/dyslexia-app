@@ -84,6 +84,10 @@ $stmt = $db->prepare("INSERT INTO user_progress
 $stmt->bind_param("isis", $user_id, $game_type, $score, $details);
 
 if ($stmt->execute()) {
+    // Actualizar la sesión para el progreso en tiempo real
+    $session_key = 'auditory_codes_level_' . $level . '_score';
+    $_SESSION[$session_key] = ($_SESSION[$session_key] ?? 0) + $score;
+    
     echo json_encode(['success' => true, 'message' => 'Progreso guardado']);
 } else {
     echo json_encode(['success' => false, 'error' => 'Error al guardar: ' . $db->error]);
