@@ -1,9 +1,9 @@
 <?php
 // Configuración de la base de datos
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'dyslexia_app');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_NAME', 'u397619294_dislexia');
+define('DB_USER', 'u397619294_dislexia');
+define('DB_PASS', 'Tustas20030102.');
 
 // Configuración de rutas
 define('BASE_URL', 'http://localhost/dyslexia-app');
