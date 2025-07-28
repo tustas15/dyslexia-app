@@ -25,6 +25,13 @@ $stmt->bind_param("ii", $user_id, $level);
 $stmt->execute();
 $progress = $stmt->get_result()->fetch_assoc();
 $level_score = $progress['level_score'] ?? 0;
+
+// En level-complete.php
+if (isset($_GET['restart'])) {
+    $_SESSION['auditory_codes_level_' . $level . '_score'] = 0; // Resetear puntuación
+    header("Location: index.php?level=$level");
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">

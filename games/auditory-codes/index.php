@@ -28,7 +28,7 @@ $stmt = $db->prepare("SELECT SUM(score) AS level_score
 $stmt->bind_param("ii", $user_id, $level);
 $stmt->execute();
 $progress = $stmt->get_result()->fetch_assoc();
-$current_score = $progress['level_score'] ?? 0;
+$current_score = $_SESSION['auditory_codes_level_' . $level . '_score'] ?? 0;
 
 // Calcular palabras completadas en este nivel
 $words_per_level = 10;
