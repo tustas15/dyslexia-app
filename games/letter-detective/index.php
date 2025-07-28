@@ -13,6 +13,33 @@ if (!is_logged_in()) {
 
 $user_id = $_SESSION['user_id'];
 $level = $_GET['level'] ?? 1;
+$difficulty = match($level) {
+    1 => 'easy',
+    2 => 'medium',
+    3 => 'hard'
+};
+
+// Obtener pares según nivel
+$pairsCount = match($level) {
+    1 => 5,
+    2 => 8,
+    3 => 10
+};
+
+$stmt = $db->prepare("SELECT * FROM letter_pairs 
+                     WHERE difficulty = ? 
+                     ORDER BY RAND() 
+                     LIMIT ?");
+$stmt->bind_param("si", $difficulty, $pairsCount);
+$stmt->execute();
+$letter_pairs = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+$game_data = [
+    'level' => $level,
+    'pairs' => $letter_pairs,
+    'current_pair' => 0,
+    'score' => 0
+];
 
 // Determinar dificultad según nivel
 $difficulty = 'easy';

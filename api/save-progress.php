@@ -31,15 +31,13 @@ if (empty($game_type)) {
 
 // Calcular puntuación para Detective de Letras
 if ($game_type === 'letter-detective') {
-    if (isset($data['final_score'])) {
-        // Guardar puntuación final
-        $score = $data['final_score'];
+    if (isset($data['level_completed'])) {
+        // Guardar cuando se completa un nivel
+        $score = $data['score'];
         $details = json_encode([
-            'level' => $level,
-            'score' => $score,
-            'correct_answers' => $data['correct_answers'] ?? 0,
-            'total_pairs' => $data['total_pairs'] ?? 0,
-            'lives_remaining' => $data['lives_remaining'] ?? 0,
+            'level' => $data['level'],
+            'correct_answers' => $data['correct_answers'],
+            'total_pairs' => $data['total_pairs'],
             'timestamp' => date('Y-m-d H:i:s')
         ]);
     } else {
@@ -87,7 +85,7 @@ if ($stmt->execute()) {
     // Actualizar la sesión para el progreso en tiempo real
     $session_key = 'auditory_codes_level_' . $level . '_score';
     $_SESSION[$session_key] = ($_SESSION[$session_key] ?? 0) + $score;
-    
+
     echo json_encode(['success' => true, 'message' => 'Progreso guardado']);
 } else {
     echo json_encode(['success' => false, 'error' => 'Error al guardar: ' . $db->error]);
