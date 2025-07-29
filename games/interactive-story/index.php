@@ -41,7 +41,7 @@ if ($completed_count >= 3) {
 }
 
 // Obtener una historia aleatoria de la dificultad actual
-$sql = "SELECT s.id, s.title, s.template, s.image_path, s.options 
+$sql = "SELECT s.id, s.title, s.template, s.options 
         FROM stories s
         WHERE s.difficulty = ?
         ORDER BY RAND() LIMIT 1";
@@ -53,72 +53,49 @@ $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
     // Intentar con cualquier historia como respaldo
-    $stmt = $db->prepare("SELECT s.id, s.title, s.template, s.image_path, s.options 
-                          FROM stories s
+    $stmt = $db->prepare("SELECT s.id, s.title, s.template, s.options 
+                        FROM stories s
                           ORDER BY RAND() LIMIT 1");
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($result->num_rows === 0) {
         die("No hay historias disponibles.");
     }
 }
 
+// Después de obtener la historia
 $story = $result->fetch_assoc();
 
-// Identificar marcadores de posición en el template PRIMERO
+// Obtener imagen desde internet
+$story_image = get_story_image($story['title']);
+
+// Identificar marcadores de posición
 preg_match_all('/\{([^}]+)\}/', $story['template'], $matches);
 $placeholders = $matches[1] ?? [];
 
 // Decodificar opciones
 $options = json_decode($story['options'], true);
 
-// Determinar categorías según el formato
+// Determinar categorías
 if (isset($options['categories'])) {
-    // Formato nuevo: usar la lista de categorías
     $categories = $options['categories'];
 } else {
-    // Formato antiguo: usar las claves del JSON
     $categories = array_keys($options);
 }
 
-// Filtrar categorías que están en el template
+// Filtrar categorías presentes en el template
 $categories = array_intersect($categories, $placeholders);
 
-// Obtener elementos para la historia
+// Obtener elementos directamente desde JSON
 $elements = [];
-
-// Obtener elementos solo si existen categorías válidas
-if (!empty($categories)) {
-    $placeholders_str = implode(',', array_fill(0, count($categories), '?'));
-    $sql = "SELECT * FROM story_elements 
-            WHERE story_id = ? AND category IN ($placeholders_str)";
-    
-    $stmt = $db->prepare($sql);
-    $types = str_repeat('s', count($categories) + 1);
-    $params = array_merge([$story['id']], $categories);
-    $stmt->bind_param($types, ...$params);
-    $stmt->execute();
-    $elements_result = $stmt->get_result();
-    
-    while ($row = $elements_result->fetch_assoc()) {
-        $elements[$row['category']][] = [
-            'word' => $row['word'],
-            'image_path' => $row['image_path'] // Corregido para usar image_path
-        ];
-    }
-}
-
-// Si no hay elementos, usar palabras del JSON (formato antiguo)
-if (empty($elements) && is_array($options)) {
-    foreach ($categories as $category) {
-        if (isset($options[$category])) {
-            foreach ($options[$category] as $word) {
-                $elements[$category][] = [
-                    'word' => $word,
-                    'image_path' => null
-                ];
-            }
+foreach ($categories as $category) {
+    if (isset($options[$category])) {
+        foreach ($options[$category] as $word) {
+            $elements[$category][] = [
+                'word' => $word,
+                'image' => get_word_image($word) // Imagen para cada palabra
+            ];
         }
     }
 }
@@ -127,13 +104,14 @@ $game_data = [
     'id' => $story['id'],
     'title' => $story['title'],
     'template' => $story['template'],
-    'image' => get_image('stories', $story['image_path']),
+    'image' => $story_image,
     'placeholders' => $placeholders,
     'categories' => $categories,
     'elements' => $elements,
     'level' => $level,
     'completed_count' => $completed_count
 ];
+
 
 $content = '';
 include 'view.php';

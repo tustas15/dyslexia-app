@@ -1,5 +1,5 @@
 <?php
-// view.php (actualizado para usar image_path)
+// view.php
 ob_start();
 ?>
 <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -42,12 +42,14 @@ ob_start();
         </div>
     </div>
 
-    <!-- Imagen de la historia (actualizada para usar image_path) -->
-    <?php if (!empty($game_data['image_path'])): ?>
+    <!-- Imagen de la historia -->
+    <?php if (!empty($game_data['image'])): ?>
         <div class="mb-6 rounded-lg overflow-hidden shadow-md max-w-md mx-auto">
-            <img src="<?= htmlspecialchars($game_data['image_path']) ?>"
-                alt="Ilustración de la historia: <?= htmlspecialchars($game_data['title']) ?>"
-                class="w-full h-auto object-cover">
+            <img src="<?= htmlspecialchars($game_data['image']) ?>"
+                alt="Ilustración: <?= htmlspecialchars($game_data['title']) ?>"
+                class="w-full h-auto object-cover"
+                loading="lazy"
+                onerror="this.onerror=null; this.src='https://source.unsplash.com/featured/800x600/?<?= urlencode($game_data['title'] . ' children illustration') ?>';">
         </div>
     <?php endif; ?>
 
@@ -70,24 +72,24 @@ ob_start();
         ?>
     </div>
 
-    <!-- Palabras disponibles (actualizado para usar image_path) -->
+    <!-- Palabras disponibles -->
     <div class="bg-blue-100 rounded-lg p-5 mb-6">
         <h3 class="text-xl font-bold text-center mb-4">Palabras Disponibles</h3>
         <div class="flex flex-wrap gap-4 justify-center" id="words-container">
             <?php
-            // Recolectar todas las palabras de todas las categorías
+            // Recolectar todas las palabras
             $allWords = [];
             foreach ($game_data['elements'] as $category => $items) {
                 foreach ($items as $item) {
                     $allWords[] = [
                         'word' => $item['word'],
                         'category' => $category,
-                        'image_path' => $item['image_path'] ?? null
+                        'image' => $item['image'] ?? null
                     ];
                 }
             }
 
-            // Si no hay palabras en story_elements, usar las del JSON
+            // Si no hay palabras, usar las del JSON
             if (empty($allWords) && is_array($options)) {
                 foreach ($options as $category => $words) {
                     if (in_array($category, $placeholders)) {
@@ -95,7 +97,7 @@ ob_start();
                             $allWords[] = [
                                 'word' => $word,
                                 'category' => $category,
-                                'image_path' => null
+                                'image' => null
                             ];
                         }
                     }
@@ -112,13 +114,15 @@ ob_start();
                     data-word="<?= htmlspecialchars($word['word']) ?>"
                     data-category="<?= htmlspecialchars($word['category']) ?>"
                     data-text="<?= htmlspecialchars($word['word']) ?>">
-                    <?php if (!empty($word['image_path'])): ?>
-                        <img src="<?= htmlspecialchars($word['image_path']) ?>"
+                    <?php if (!empty($word['image'])): ?>
+                        <img src="<?= htmlspecialchars($word['image']) ?>"
                             alt="<?= htmlspecialchars($word['word']) ?>"
-                            class="w-24 h-24 object-contain mx-auto mb-2">
+                            class="w-24 h-24 object-contain mx-auto mb-2"
+                            loading="lazy"
+                            onerror="this.onerror=null; this.src='https://via.placeholder.com/200?text=<?= urlencode($word['word']) ?>';">
                     <?php else: ?>
                         <div class="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center mb-2">
-                            <i class="fas fa-image text-gray-400 text-3xl"></i>
+                            <i class="fas fa-font text-gray-400 text-3xl"></i>
                         </div>
                     <?php endif; ?>
                     <div class="font-bold h-10 flex items-center justify-center mb-1"><?= htmlspecialchars($word['word']) ?></div>

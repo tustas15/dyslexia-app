@@ -45,3 +45,57 @@ function save_progress($user_id, $game_type, $score, $details)
     $stmt->bind_param("isis", $user_id, $game_type, $score, $details_json);
     return $stmt->execute();
 }
+
+function get_story_image($title) {
+    // Palabras clave optimizadas para ilustraciones infantiles
+    $keywords = urlencode($title . ' children illustration');
+    
+    // Usar la API de Unsplash con tu key
+    $access_key = 'aLWVSlw4IrYuL_x7Pkr3OodCkNwORHTUmj9-RigOI28';
+    $url = "https://api.unsplash.com/search/photos?page=1&query=$keywords&per_page=1&client_id=$access_key";
+    
+    try {
+        $context = stream_context_create([
+            'http' => ['timeout' => 2] // Timeout de 2 segundos
+        ]);
+        
+        $response = file_get_contents($url, false, $context);
+        $data = json_decode($response, true);
+        
+        if (!empty($data['results'][0]['urls']['regular'])) {
+            return $data['results'][0]['urls']['regular'];
+        }
+    } catch (Exception $e) {
+        // Fallback silencioso
+    }
+    
+    // Fallback a servicio público
+    return "https://source.unsplash.com/featured/800x600/?$keywords";
+}
+
+function get_word_image($word) {
+    // Palabras clave optimizadas para niños
+    $keywords = urlencode($word . ' children');
+    
+    // Usar API para palabras si es necesario
+    $access_key = 'aLWVSlw4IrYuL_x7Pkr3OodCkNwORHTUmj9-RigOI28';
+    $url = "https://api.unsplash.com/search/photos?page=1&query=$keywords&per_page=1&client_id=$access_key";
+    
+    try {
+        $context = stream_context_create([
+            'http' => ['timeout' => 1] // Timeout más corto
+        ]);
+        
+        $response = file_get_contents($url, false, $context);
+        $data = json_decode($response, true);
+        
+        if (!empty($data['results'][0]['urls']['thumb'])) {
+            return $data['results'][0]['urls']['thumb'];
+        }
+    } catch (Exception $e) {
+        // Fallback silencioso
+    }
+    
+    // Fallback a servicio público
+    return "https://source.unsplash.com/featured/200x200/?$keywords";
+}
