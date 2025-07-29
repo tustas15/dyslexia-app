@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 28-07-2025 a las 19:12:32
+-- Tiempo de generación: 29-07-2025 a las 19:11:05
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -89,6 +89,7 @@ INSERT INTO `game_options` (`id`, `word_id`, `option_text`, `is_correct`, `game_
 
 CREATE TABLE `letter_pairs` (
   `id` int(11) NOT NULL,
+  `pair_set` varchar(10) NOT NULL,
   `letter1` char(1) NOT NULL,
   `letter2` char(1) NOT NULL,
   `correct_letter` char(1) NOT NULL,
@@ -99,52 +100,25 @@ CREATE TABLE `letter_pairs` (
 -- Volcado de datos para la tabla `letter_pairs`
 --
 
-INSERT INTO `letter_pairs` (`id`, `letter1`, `letter2`, `correct_letter`, `difficulty`) VALUES
-(1, 'b', 'd', 'b', 'easy'),
-(2, 'p', 'q', 'p', 'easy'),
-(3, 'm', 'n', 'm', 'easy'),
-(4, 'u', 'n', 'u', 'easy'),
-(5, 'a', 'o', 'a', 'easy'),
-(6, 'b', 'd', 'd', 'medium'),
-(7, 'p', 'q', 'q', 'medium'),
-(8, 'm', 'n', 'n', 'medium'),
-(9, 'u', 'n', 'n', 'medium'),
-(10, 'a', 'o', 'o', 'medium'),
-(11, 'ñ', 'n', 'ñ', 'hard'),
-(12, 'g', 'q', 'g', 'hard'),
-(13, 'r', 'v', 'r', 'hard'),
-(14, 's', 'z', 's', 'hard'),
-(15, 'c', 'e', 'c', 'hard'),
-(16, 'b', 'd', 'b', 'easy'),
-(17, 'p', 'q', 'p', 'easy'),
-(18, 'm', 'n', 'm', 'easy'),
-(19, 'u', 'n', 'u', 'easy'),
-(20, 'a', 'o', 'a', 'easy'),
-(21, 'b', 'd', 'd', 'medium'),
-(22, 'p', 'q', 'q', 'medium'),
-(23, 'm', 'n', 'n', 'medium'),
-(24, 'u', 'n', 'n', 'medium'),
-(25, 'a', 'o', 'o', 'medium'),
-(26, 'ñ', 'n', 'ñ', 'hard'),
-(27, 'g', 'q', 'g', 'hard'),
-(28, 'r', 'v', 'r', 'hard'),
-(29, 's', 'z', 's', 'hard'),
-(30, 'c', 'e', 'c', 'hard'),
-(31, 'b', 'd', 'b', 'easy'),
-(32, 'p', 'q', 'p', 'easy'),
-(33, 'm', 'n', 'm', 'easy'),
-(34, 'u', 'n', 'u', 'easy'),
-(35, 'a', 'o', 'a', 'easy'),
-(36, 'b', 'd', 'd', 'medium'),
-(37, 'p', 'q', 'q', 'medium'),
-(38, 'm', 'n', 'n', 'medium'),
-(39, 'u', 'n', 'n', 'medium'),
-(40, 'a', 'o', 'o', 'medium'),
-(41, 'ñ', 'n', 'ñ', 'hard'),
-(42, 'g', 'q', 'g', 'hard'),
-(43, 'r', 'v', 'r', 'hard'),
-(44, 's', 'z', 's', 'hard'),
-(45, 'c', 'e', 'c', 'hard');
+INSERT INTO `letter_pairs` (`id`, `pair_set`, `letter1`, `letter2`, `correct_letter`, `difficulty`) VALUES
+(1, '', 'b', 'd', 'b', 'easy'),
+(2, '', 'd', 'b', 'd', 'easy'),
+(3, '', 'p', 'q', 'p', 'easy'),
+(4, '', 'q', 'p', 'q', 'easy'),
+(5, '', 'm', 'w', 'm', 'easy'),
+(6, '', 'w', 'm', 'w', 'easy'),
+(7, '', 'ñ', 'n', 'ñ', 'medium'),
+(8, '', 'n', 'ñ', 'n', 'medium'),
+(9, '', 'g', 'q', 'g', 'medium'),
+(10, '', 'q', 'g', 'q', 'medium'),
+(11, '', 'u', 'n', 'u', 'medium'),
+(12, '', 'n', 'u', 'n', 'medium'),
+(13, '', 'b', 'q', 'b', 'hard'),
+(14, '', 'd', 'p', 'd', 'hard'),
+(15, '', 'ñ', 'g', 'ñ', 'hard'),
+(16, '', 'z', 's', 's', 'hard'),
+(17, '', 'r', 'v', 'r', 'hard'),
+(18, '', 'c', 'e', 'c', 'hard');
 
 -- --------------------------------------------------------
 
@@ -226,10 +200,9 @@ INSERT INTO `rhymes` (`id`, `word`, `rhyme_word`, `difficulty`) VALUES
 CREATE TABLE `stories` (
   `id` int(11) NOT NULL,
   `title` varchar(100) NOT NULL,
-  `image_path` varchar(255) DEFAULT NULL,
   `template` text NOT NULL,
   `description` text DEFAULT NULL,
-  `options` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`options`)),
+  `options` longtext NOT NULL CHECK (json_valid(`options`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `difficulty` enum('easy','medium','hard') DEFAULT 'easy',
   `min_categories` int(11) DEFAULT 2,
@@ -240,46 +213,15 @@ CREATE TABLE `stories` (
 -- Volcado de datos para la tabla `stories`
 --
 
-INSERT INTO `stories` (`id`, `title`, `image_path`, `template`, `description`, `options`, `created_at`, `difficulty`, `min_categories`, `max_categories`) VALUES
-(1, 'Aventura en el Bosque', NULL, 'Había una vez un {personaje} que vivía en un {lugar}. Un día decidió {accion} y descubrió {descubrimiento}.', NULL, '{\r\n        \"personaje\": [\"niño valiente\", \"conejo travieso\", \"oso bondadoso\"],\r\n        \"lugar\": [\"bosque encantado\", \"montaña mágica\", \"valle luminoso\"],\r\n        \"accion\": [\"explorar\", \"buscar amigos\", \"resolver un misterio\"],\r\n        \"descubrimiento\": [\"un tesoro brillante\", \"una ciudad perdida\", \"un nuevo amigo\"]\r\n    }', '2025-07-20 21:39:39', 'easy', 2, 3),
-(2, 'Viaje al Espacio', NULL, 'Un {personaje} viajó a {lugar} en su {vehiculo}. Allí encontró {descubrimiento} y aprendió {leccion}.', NULL, '{\r\n    \"personaje\": [\"astronauta curioso\", \"robot explorador\", \"niño aventurero\"],\r\n    \"lugar\": [\"la luna\", \"marte\", \"una estrella lejana\"],\r\n    \"vehiculo\": [\"cohete\", \"nave espacial\", \"platillo volador\"],\r\n    \"descubrimiento\": [\"criaturas amigables\", \"cristales brillantes\", \"una ciudad alienígena\"],\r\n    \"leccion\": [\"la importancia de la amistad\", \"el valor de la curiosidad\", \"a cuidar nuestro planeta\"]\r\n}', '2025-07-20 22:11:20', 'easy', 2, 3),
-(3, 'Misterio en el Océano', NULL, 'Una {personaje} se sumergió en {lugar} con su {vehiculo}. Descubrió {descubrimiento} y resolvió {problema}.', NULL, '{\r\n    \"personaje\": [\"sirena valiente\", \"buzo experto\", \"tortuga sabia\"],\r\n    \"lugar\": [\"el mar profundo\", \"un arrecife de coral\", \"un barco hundido\"],\r\n    \"vehiculo\": [\"submarino\", \"caparazón mágico\", \"vehículo acuático\"],\r\n    \"descubrimiento\": [\"un tesoro perdido\", \"una especie desconocida\", \"un mensaje en una botella\"],\r\n    \"problema\": [\"un pulpo atrapado\", \"la contaminación del océano\", \"un misterio sin resolver\"]\r\n}', '2025-07-20 22:11:20', 'easy', 2, 3),
-(4, 'Viaje al Espacio', NULL, 'Un {personaje} viajó a {lugar} en su {vehiculo}. Allí encontró {descubrimiento} y aprendió {leccion}.', NULL, '{\r\n    \"personaje\": [\"astronauta curioso\", \"robot explorador\", \"niño aventurero\"],\r\n    \"lugar\": [\"la luna\", \"marte\", \"una estrella lejana\"],\r\n    \"vehiculo\": [\"cohete\", \"nave espacial\", \"platillo volador\"],\r\n    \"descubrimiento\": [\"criaturas amigables\", \"cristales brillantes\", \"una ciudad alienígena\"],\r\n    \"leccion\": [\"la importancia de la amistad\", \"el valor de la curiosidad\", \"a cuidar nuestro planeta\"]\r\n}', '2025-07-20 22:16:22', 'medium', 3, 4),
-(5, 'Misterio en el Océano', NULL, 'Una {personaje} se sumergió en {lugar} con su {vehiculo}. Descubrió {descubrimiento} y resolvió {problema}.', NULL, '{\r\n    \"personaje\": [\"sirena valiente\", \"buzo experto\", \"tortuga sabia\"],\r\n    \"lugar\": [\"el mar profundo\", \"un arrecife de coral\", \"un barco hundido\"],\r\n    \"vehiculo\": [\"submarino\", \"caparazón mágico\", \"vehículo acuático\"],\r\n    \"descubrimiento\": [\"un tesoro perdido\", \"una especie desconocida\", \"un mensaje en una botella\"],\r\n    \"problema\": [\"un pulpo atrapado\", \"la contaminación del océano\", \"un misterio sin resolver\"]\r\n}', '2025-07-20 22:16:22', 'medium', 3, 4),
-(6, 'Aventura en el Bosque', 'bosque.jpg', 'Había una vez un {personaje} que vivía en un {lugar}. Un día decidió {accion} y descubrió {descubrimiento}.', 'Crea una historia mágica en el bosque encantado', '{\r\n    \"categories\": [\"personaje\", \"lugar\", \"accion\", \"descubrimiento\"]\r\n}', '2025-07-20 22:35:44', 'hard', 4, 5);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `story_elements`
---
-
-CREATE TABLE `story_elements` (
-  `id` int(11) NOT NULL,
-  `story_id` int(11) NOT NULL,
-  `category` varchar(50) NOT NULL,
-  `word` varchar(100) NOT NULL,
-  `image_path` varchar(255) NOT NULL,
-  `audio_path` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `story_elements`
---
-
-INSERT INTO `story_elements` (`id`, `story_id`, `category`, `word`, `image_path`, `audio_path`) VALUES
-(1, 1, 'personaje', 'niño valiente', 'nino.png', 'nino.mp3'),
-(2, 1, 'personaje', 'conejo travieso', 'conejo.png', 'conejo.mp3'),
-(3, 1, 'personaje', 'oso bondadoso', 'oso.png', 'oso.mp3'),
-(4, 1, 'lugar', 'bosque encantado', 'bosque.png', 'bosque.mp3'),
-(5, 1, 'lugar', 'montaña mágica', 'montaña.png', 'montaña.mp3'),
-(6, 1, 'lugar', 'valle luminoso', 'valle.png', 'valle.mp3'),
-(7, 1, 'accion', 'explorar', 'explorar.png', 'explorar.mp3'),
-(8, 1, 'accion', 'buscar amigos', 'amigos.png', 'amigos.mp3'),
-(9, 1, 'accion', 'resolver un misterio', 'misterio.png', 'misterio.mp3'),
-(10, 1, 'descubrimiento', 'un tesoro brillante', 'tesoro.png', 'tesoro.mp3'),
-(11, 1, 'descubrimiento', 'una ciudad perdida', 'ciudad.png', 'ciudad.mp3'),
-(12, 1, 'descubrimiento', 'un nuevo amigo', 'amigo.png', 'amigo.mp3');
+INSERT INTO `stories` (`id`, `title`, `template`, `description`, `options`, `created_at`, `difficulty`, `min_categories`, `max_categories`) VALUES
+(2, 'Viaje al Espacio', 'Un {personaje} viajó a {lugar} en su {vehiculo}. Allí encontró {descubrimiento} y aprendió {leccion}.', NULL, '{\n    \"personaje\": [\"astronauta curioso\", \"robot explorador\", \"niño aventurero\"],\n    \"lugar\": [\"la luna\", \"marte\", \"una estrella lejana\"],\n    \"vehiculo\": [\"cohete\", \"nave espacial\", \"platillo volador\"],\n    \"descubrimiento\": [\"criaturas amigables\", \"cristales brillantes\", \"una ciudad alienígena\"],\n    \"leccion\": [\"la importancia de la amistad\", \"el valor de la curiosidad\", \"a cuidar nuestro planeta\"]\n}', '2025-07-20 22:11:20', 'easy', 2, 3),
+(3, 'Misterio en el Océano', 'Una {personaje} se sumergió en {lugar} con su {vehiculo}. Descubrió {descubrimiento} y resolvió {problema}.', NULL, '{\r\n    \"personaje\": [\"sirena valiente\", \"buzo experto\", \"tortuga sabia\"],\r\n    \"lugar\": [\"el mar profundo\", \"un arrecife de coral\", \"un barco hundido\"],\r\n    \"vehiculo\": [\"submarino\", \"caparazón mágico\", \"vehículo acuático\"],\r\n    \"descubrimiento\": [\"un tesoro perdido\", \"una especie desconocida\", \"un mensaje en una botella\"],\r\n    \"problema\": [\"un pulpo atrapado\", \"la contaminación del océano\", \"un misterio sin resolver\"]\r\n}', '2025-07-20 22:11:20', 'easy', 2, 3),
+(4, 'Viaje al Espacio', 'Un {personaje} viajó a {lugar} en su {vehiculo}. Allí encontró {descubrimiento} y aprendió {leccion}.', NULL, '{\r\n    \"personaje\": [\"astronauta curioso\", \"robot explorador\", \"niño aventurero\"],\r\n    \"lugar\": [\"la luna\", \"marte\", \"una estrella lejana\"],\r\n    \"vehiculo\": [\"cohete\", \"nave espacial\", \"platillo volador\"],\r\n    \"descubrimiento\": [\"criaturas amigables\", \"cristales brillantes\", \"una ciudad alienígena\"],\r\n    \"leccion\": [\"la importancia de la amistad\", \"el valor de la curiosidad\", \"a cuidar nuestro planeta\"]\r\n}', '2025-07-20 22:16:22', 'medium', 3, 4),
+(5, 'Misterio en el Océano', 'Una {personaje} se sumergió en {lugar} con su {vehiculo}. Descubrió {descubrimiento} y resolvió {problema}.', NULL, '{\r\n    \"personaje\": [\"sirena valiente\", \"buzo experto\", \"tortuga sabia\"],\r\n    \"lugar\": [\"el mar profundo\", \"un arrecife de coral\", \"un barco hundido\"],\r\n    \"vehiculo\": [\"submarino\", \"caparazón mágico\", \"vehículo acuático\"],\r\n    \"descubrimiento\": [\"un tesoro perdido\", \"una especie desconocida\", \"un mensaje en una botella\"],\r\n    \"problema\": [\"un pulpo atrapado\", \"la contaminación del océano\", \"un misterio sin resolver\"]\r\n}', '2025-07-20 22:16:22', 'medium', 3, 4),
+(6, 'Aventura en el Bosque', 'Había una vez un {personaje} que vivía en un {lugar}. Un día decidió {accion} y descubrió {descubrimiento}.', 'Crea una historia mágica en el bosque encantado', '{\n    \"categories\": [\"personaje\", \"lugar\", \"accion\", \"descubrimiento\"]\n}', '2025-07-20 22:35:44', 'hard', 4, 5),
+(7, 'Luna, la Llama que No Sabía Saltar', 'Había una vez, en lo alto de los Andes, una llama pequeña y muy curiosa llamada {nombre}. A diferencia de las otras llamas de su rebaño, Luna no podía saltar muy {altura}.\n\n—\"¡Vamos, Luna! ¡Salta como nosotras!\", le decían sus {amigos}.\n\nLuna lo intentaba una y otra vez, pero siempre terminaba rodando entre las {flores}. Aunque se reía, a veces se sentía {emoción} por no ser como las demás.\n\nUn día, mientras todas las llamas jugaban a saltar piedras, escucharon un {sonido} detrás de un arbusto. Era una pequeña vizcacha atrapada entre unas ramas.\n\n—\"¡Ayuda!\", gritó.\n\nLas otras llamas no podían pasar entre las ramas, pero Luna, que era más {característica} y ágil, entró sin problema y liberó a la vizcacha.\n\n—\"¡Gracias, valiente llama!\", dijo la vizcacha. \"¡Tu tamaño fue perfecto para ayudarme!\"\n\nDesde ese día, Luna entendió que ser diferente no era algo malo. ¡Era su superpoder!\n\nLas llamas aprendieron que todos tienen {cualidad} distintos, y que la amistad crece cuando nos aceptamos tal como somos.', NULL, '{\r\n        \"nombre\": [\"Luna\", \"Estrella\", \"Sol\"],\r\n        \"altura\": [\"alto\", \"lejos\", \"rápido\"],\r\n        \"amigos\": [\"amigas\", \"compañeras\", \"hermanas\"],\r\n        \"flores\": [\"flores\", \"piedras\", \"hojas\"],\r\n        \"emoción\": [\"triste\", \"desanimada\", \"frustrada\"],\r\n        \"sonido\": [\"llanto\", \"grito\", \"susurro\"],\r\n        \"característica\": [\"bajita\", \"delgada\", \"pequeña\"],\r\n        \"cualidad\": [\"talentos\", \"habilidades\", \"dones\"]\r\n    }', '2025-07-29 17:07:54', 'easy', 3, 5),
+(8, 'El Robot en el Jardín', 'En un futuro no muy lejano, un robot llamado {nombre_robot} vivía en un jardín lleno de {flores}. A diferencia de los otros robots, a {nombre_robot} le encantaba cuidar las plantas y los {animales}.\n\nUn día, descubrió una planta extraña que crecía más rápido de lo normal. Era una {planta_mágica} que brillaba en la oscuridad. Pero la planta estaba enferma y necesitaba {remedio}.\n\n{nombre_robot} decidió buscar ayuda. Preguntó a los pájaros, pero ellos solo sabían de {conocimiento_aves}. Luego, un sabio {animal_sabio} le dijo que necesitaba {elemento_mágico} de la montaña más alta.\n\nEl robot emprendió un viaje. En el camino, tuvo que resolver un acertijo: \"Vuela sin alas, llora sin ojos. ¿Qué soy?\" La respuesta era {acertijo}.\n\nAl llegar a la montaña, encontró el {elemento_mágico}. Con él, curó a la planta, que resultó ser la última de su especie. El jardín se llenó de luz y alegría, y {nombre_robot} aprendió que hasta un robot puede hacer una gran diferencia.', NULL, '{\r\n        \"nombre_robot\": [\"Robi\", \"Chip\", \"Bin\"],\r\n        \"flores\": [\"rosas\", \"girasoles\", \"tulipanes\"],\r\n        \"animales\": [\"mariposas\", \"pájaros\", \"abejas\"],\r\n        \"planta_mágica\": [\"Luminaria\", \"Estelaria\", \"Solaris\"],\r\n        \"remedio\": [\"un remedio especial\", \"un ingrediente mágico\", \"una poción\"],\r\n        \"conocimiento_aves\": [\"semillas\", \"nidos\", \"canciones\"],\r\n        \"animal_sabio\": [\"búho\", \"tortuga\", \"ardilla\"],\r\n        \"elemento_mágico\": [\"un cristal\", \"una piedra\", \"una flor\"],\r\n        \"acertijo\": [\"el viento\", \"las nubes\", \"el sol\"]\r\n    }', '2025-07-29 17:08:49', 'medium', 4, 6),
+(9, 'El Secreto del Océano Profundo', 'En las profundidades del océano, donde la luz del sol apenas llega, vivía una comunidad de criaturas bioluminiscentes. Entre ellas, una pequeña {criatura} llamada {nombre} soñaba con descubrir el secreto de la {ciudad_perdida}.\n\nUn día, {nombre} se aventuró más allá de los arrecifes conocidos. Encontró un mapa grabado en una {objeto_antiguo} que indicaba el camino. Pero para seguir el mapa, necesitaba resolver tres enigmas:\n\n1. \"Soy la llave de dos ciudades, pero no puedo abrir ninguna cerradura. ¿Qué soy?\" -> {enig1}\n2. \"Tengo ciudades, pero no casas; tengo montañas, pero no árboles; tengo agua, pero no peces. ¿Qué soy?\" -> {enig2}\n3. \"Lo que ayer fue mañana y mañana será ayer. ¿Qué soy?\" -> {enig3}\n\nCon la ayuda de un viejo {animal_marino}, {nombre} resolvió los enigmas: {enig1}, {enig2} y {enig3}.\n\nSiguiendo el mapa, llegó a la ciudad perdida, que estaba hecha de {material}. Allí, encontró no un tesoro, sino el conocimiento de una civilización antigua que vivía en armonía con el océano.\n\n{nombre} regresó a su comunidad y compartió lo aprendido. Desde entonces, las criaturas del océano profundo protegen el equilibrio marino con sabiduría ancestral.', NULL, '{\r\n        \"criatura\": [\"medusa\", \"pulpo\", \"calamar\"],\r\n        \"nombre\": [\"Lumin\", \"Ondina\", \"Nerio\"],\r\n        \"ciudad_perdida\": [\"Atlántida\", \"Lemuria\", \"Thule\"],\r\n        \"objeto_antiguo\": [\"concha\", \"columna\", \"cofre\"],\r\n        \"animal_marino\": [\"tortuga\", \"cangrejo\", \"ballena\"],\r\n        \"enig1\": [\"un río\", \"una carretera\", \"un puente\"],\r\n        \"enig2\": [\"un mapa\", \"un libro\", \"un cuadro\"],\r\n        \"enig3\": [\"hoy\", \"el presente\", \"ahora\"],\r\n        \"material\": [\"coral fosilizado\", \"perlas gigantes\", \"cristal de las profundidades\"]\r\n    }', '2025-07-29 17:08:57', 'hard', 5, 7);
 
 -- --------------------------------------------------------
 
@@ -316,73 +258,29 @@ CREATE TABLE `user_progress` (
   `level` int(11) DEFAULT NULL,
   `score` int(11) NOT NULL DEFAULT 0,
   `details` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`details`)),
-  `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
+  `is_restart` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `user_progress`
 --
 
-INSERT INTO `user_progress` (`id`, `user_id`, `game_type`, `level`, `score`, `details`, `timestamp`) VALUES
-(1, 1, 'letter-detective', NULL, 45, '{\"level\":1,\"score\":45,\"correct_answers\":9,\"total_pairs\":10,\"timestamp\":\"2025-07-22 00:56:00\"}', '2025-07-21 22:56:00'),
-(2, 1, 'letter-detective', NULL, 50, '{\"level\":1,\"score\":50,\"correct_answers\":10,\"total_pairs\":10,\"timestamp\":\"2025-07-22 01:08:47\"}', '2025-07-21 23:08:47'),
-(3, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"zapato\",\"selected\":\"\\n                zapato            \",\"timestamp\":\"2025-07-22 02:28:55\"}', '2025-07-22 00:28:55'),
-(4, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"zapato\",\"selected\":\"\\n                zapato            \",\"timestamp\":\"2025-07-22 02:28:59\"}', '2025-07-22 00:28:59'),
-(5, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"casa\",\"selected\":\"\\n                casa            \",\"timestamp\":\"2025-07-22 02:29:04\"}', '2025-07-22 00:29:04'),
-(6, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"zapato\",\"selected\":\"\\n                zapato            \",\"timestamp\":\"2025-07-22 02:29:07\"}', '2025-07-22 00:29:07'),
-(7, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"sol\",\"selected\":\"\\n                sol            \",\"timestamp\":\"2025-07-22 02:29:10\"}', '2025-07-22 00:29:10'),
-(8, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"flor\",\"selected\":\"\\n                flor            \",\"timestamp\":\"2025-07-22 02:29:12\"}', '2025-07-22 00:29:12'),
-(9, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"casa\",\"selected\":\"\\n                casa            \",\"timestamp\":\"2025-07-22 02:29:16\"}', '2025-07-22 00:29:16'),
-(10, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"flor\",\"selected\":\"\\n                flor            \",\"timestamp\":\"2025-07-22 02:29:18\"}', '2025-07-22 00:29:18'),
-(11, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"casa\",\"selected\":\"\\n                casa            \",\"timestamp\":\"2025-07-22 02:29:23\"}', '2025-07-22 00:29:23'),
-(12, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"sol\",\"selected\":\"\\n                sol            \",\"timestamp\":\"2025-07-22 02:29:25\"}', '2025-07-22 00:29:25'),
-(13, 1, 'auditory-codes', NULL, 10, '{\"level\":2,\"correct\":true,\"word\":\"luna\",\"selected\":\"\\n                perro            \",\"timestamp\":\"2025-07-22 02:29:34\"}', '2025-07-22 00:29:34'),
-(14, 1, 'auditory-codes', NULL, 10, '{\"level\":2,\"correct\":true,\"word\":\"luna\",\"selected\":\"\\n                perro            \",\"timestamp\":\"2025-07-22 02:29:37\"}', '2025-07-22 00:29:37'),
-(15, 1, 'auditory-codes', NULL, 0, '{\"level\":2,\"correct\":false,\"word\":\"gato\",\"selected\":\"\\n                libro            \",\"timestamp\":\"2025-07-22 02:29:39\"}', '2025-07-22 00:29:39'),
-(16, 1, 'auditory-codes', NULL, 10, '{\"level\":2,\"correct\":true,\"word\":\"luna\",\"selected\":\"\\n                perro            \",\"timestamp\":\"2025-07-22 02:29:47\"}', '2025-07-22 00:29:47'),
-(17, 1, 'auditory-codes', NULL, 0, '{\"level\":2,\"correct\":false,\"word\":\"gato\",\"selected\":\"\\n                libra            \",\"timestamp\":\"2025-07-22 02:29:50\"}', '2025-07-22 00:29:50'),
-(18, 1, 'auditory-codes', NULL, 0, '{\"level\":2,\"correct\":false,\"word\":\"gato\",\"selected\":\"\\n                libro            \",\"timestamp\":\"2025-07-22 02:29:53\"}', '2025-07-22 00:29:53'),
-(19, 1, 'auditory-codes', NULL, 10, '{\"level\":2,\"correct\":true,\"word\":\"gato\",\"selected\":\"\\n                libro            \",\"timestamp\":\"2025-07-22 02:29:56\"}', '2025-07-22 00:29:56'),
-(20, 1, 'auditory-codes', NULL, 0, '{\"level\":2,\"correct\":false,\"word\":\"gato\",\"selected\":\"\\n                libro            \",\"timestamp\":\"2025-07-22 02:30:10\"}', '2025-07-22 00:30:10'),
-(21, 1, 'auditory-codes', NULL, 10, '{\"level\":2,\"correct\":true,\"word\":\"gato\",\"selected\":\"\\n                libro            \",\"timestamp\":\"2025-07-22 02:30:12\"}', '2025-07-22 00:30:12'),
-(22, 1, 'auditory-codes', NULL, 0, '{\"level\":2,\"correct\":false,\"word\":\"gato\",\"selected\":\"\\n                libra            \",\"timestamp\":\"2025-07-22 02:30:14\"}', '2025-07-22 00:30:14'),
-(23, 1, 'interactive-story', NULL, 50, '{\"level\":1,\"story_id\":1,\"completed\":true,\"timestamp\":\"2025-07-23 22:31:28\"}', '2025-07-23 20:31:28'),
-(24, 1, 'interactive-story', NULL, 50, '{\"level\":1,\"story_id\":2,\"completed\":true,\"timestamp\":\"2025-07-23 22:32:19\"}', '2025-07-23 20:32:19'),
-(25, 1, 'interactive-story', NULL, 50, '{\"level\":1,\"story_id\":3,\"completed\":true,\"timestamp\":\"2025-07-23 22:32:39\"}', '2025-07-23 20:32:39'),
-(26, 1, 'interactive-story', NULL, 50, '{\"level\":2,\"story_id\":4,\"completed\":true,\"timestamp\":\"2025-07-23 22:36:54\"}', '2025-07-23 20:36:54'),
-(27, 1, 'interactive-story', NULL, 50, '{\"level\":2,\"story_id\":4,\"completed\":true,\"timestamp\":\"2025-07-23 22:36:57\"}', '2025-07-23 20:36:57'),
-(28, 1, 'interactive-story', NULL, 50, '{\"level\":2,\"story_id\":5,\"completed\":true,\"timestamp\":\"2025-07-23 22:36:58\"}', '2025-07-23 20:36:58'),
-(29, 1, 'interactive-story', NULL, 50, '{\"level\":3,\"story_id\":6,\"completed\":true,\"timestamp\":\"2025-07-23 22:37:33\"}', '2025-07-23 20:37:33'),
-(30, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"zapato\",\"selected\":\"\\n                zapato            \",\"timestamp\":\"2025-07-28 18:11:16\"}', '2025-07-28 16:11:16'),
-(31, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"zapato\",\"selected\":\"\\n                zapato            \",\"timestamp\":\"2025-07-28 18:11:19\"}', '2025-07-28 16:11:19'),
-(32, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"zapato\",\"selected\":\"\\n                zapato            \",\"timestamp\":\"2025-07-28 18:11:22\"}', '2025-07-28 16:11:22'),
-(33, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"sol\",\"selected\":\"\\n                sol            \",\"timestamp\":\"2025-07-28 18:11:26\"}', '2025-07-28 16:11:26'),
-(34, 1, 'auditory-codes', NULL, 0, '{\"level\":1,\"correct\":false,\"word\":\"flor\",\"selected\":\"\\n                flol            \",\"timestamp\":\"2025-07-28 18:11:29\"}', '2025-07-28 16:11:29'),
-(35, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"flor\",\"selected\":\"\\n                flor            \",\"timestamp\":\"2025-07-28 18:11:31\"}', '2025-07-28 16:11:31'),
-(36, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"flor\",\"selected\":\"\\n                flor            \",\"timestamp\":\"2025-07-28 18:12:16\"}', '2025-07-28 16:12:16'),
-(37, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"zapato\",\"selected\":\"\\n                zapato            \",\"timestamp\":\"2025-07-28 18:12:19\"}', '2025-07-28 16:12:19'),
-(38, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"zapato\",\"selected\":\"\\n                zapato            \",\"timestamp\":\"2025-07-28 18:12:29\"}', '2025-07-28 16:12:29'),
-(39, 1, 'auditory-codes', NULL, 0, '{\"level\":1,\"correct\":false,\"word\":\"casa\",\"selected\":\"\\n                tasa            \",\"timestamp\":\"2025-07-28 18:13:51\"}', '2025-07-28 16:13:51'),
-(40, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"casa\",\"selected\":\"\\n                casa            \",\"timestamp\":\"2025-07-28 18:13:54\"}', '2025-07-28 16:13:54'),
-(41, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"flor\",\"selected\":\"\\n                flor            \",\"timestamp\":\"2025-07-28 18:13:58\"}', '2025-07-28 16:13:58'),
-(42, 1, 'auditory-codes', NULL, 10, '{\"level\":2,\"correct\":true,\"word\":\"luna\",\"selected\":\"\\n                perro            \",\"timestamp\":\"2025-07-28 18:34:00\"}', '2025-07-28 16:34:00'),
-(43, 1, 'auditory-codes', NULL, 0, '{\"level\":2,\"correct\":false,\"word\":\"gato\",\"selected\":\"\\n                libro            \",\"timestamp\":\"2025-07-28 18:34:05\"}', '2025-07-28 16:34:05'),
-(44, 1, 'auditory-codes', NULL, 10, '{\"level\":2,\"correct\":true,\"word\":\"gato\",\"selected\":\"\\n                libro            \",\"timestamp\":\"2025-07-28 18:34:09\"}', '2025-07-28 16:34:09'),
-(45, 1, 'auditory-codes', NULL, 0, '{\"level\":2,\"correct\":false,\"word\":\"luna\",\"selected\":\"\\n                perro            \",\"timestamp\":\"2025-07-28 18:42:40\"}', '2025-07-28 16:42:40'),
-(46, 1, 'auditory-codes', NULL, 10, '{\"level\":2,\"correct\":true,\"word\":\"pato\",\"selected\":\"\\n                pato            \",\"timestamp\":\"2025-07-28 18:44:05\"}', '2025-07-28 16:44:05'),
-(47, 1, 'auditory-codes', NULL, 10, '{\"level\":2,\"correct\":true,\"word\":\"pato\",\"selected\":\"\\n                pato            \",\"timestamp\":\"2025-07-28 18:44:08\"}', '2025-07-28 16:44:08'),
-(48, 1, 'auditory-codes', NULL, 10, '{\"level\":2,\"correct\":true,\"word\":\"pato\",\"selected\":\"\\n                pato            \",\"timestamp\":\"2025-07-28 18:44:11\"}', '2025-07-28 16:44:11'),
-(49, 1, 'auditory-codes', NULL, 10, '{\"level\":3,\"correct\":true,\"word\":\"elefante\",\"selected\":\"\\n                elefante            \",\"timestamp\":\"2025-07-28 19:06:33\"}', '2025-07-28 17:06:33'),
-(50, 1, 'auditory-codes', NULL, 10, '{\"level\":3,\"correct\":true,\"word\":\"libro\",\"selected\":\"\\n                libro            \",\"timestamp\":\"2025-07-28 19:06:36\"}', '2025-07-28 17:06:36'),
-(51, 1, 'auditory-codes', NULL, 10, '{\"level\":3,\"correct\":true,\"word\":\"libro\",\"selected\":\"\\n                libro            \",\"timestamp\":\"2025-07-28 19:06:41\"}', '2025-07-28 17:06:41'),
-(52, 1, 'auditory-codes', NULL, 10, '{\"level\":3,\"correct\":true,\"word\":\"astronauta\",\"selected\":\"\\n                astronauta            \",\"timestamp\":\"2025-07-28 19:06:44\"}', '2025-07-28 17:06:44'),
-(53, 1, 'auditory-codes', NULL, 10, '{\"level\":3,\"correct\":true,\"word\":\"perro\",\"selected\":\"\\n                perro            \",\"timestamp\":\"2025-07-28 19:06:46\"}', '2025-07-28 17:06:46'),
-(54, 1, 'auditory-codes', NULL, 10, '{\"level\":3,\"correct\":true,\"word\":\"elefante\",\"selected\":\"\\n                elefante            \",\"timestamp\":\"2025-07-28 19:06:50\"}', '2025-07-28 17:06:50'),
-(55, 1, 'auditory-codes', NULL, 10, '{\"level\":3,\"correct\":true,\"word\":\"elefante\",\"selected\":\"\\n                elefante            \",\"timestamp\":\"2025-07-28 19:06:52\"}', '2025-07-28 17:06:52'),
-(56, 1, 'auditory-codes', NULL, 0, '{\"level\":3,\"correct\":false,\"word\":\"astronauta\",\"selected\":\"\\n                astronauto            \",\"timestamp\":\"2025-07-28 19:06:54\"}', '2025-07-28 17:06:54'),
-(57, 1, 'auditory-codes', NULL, 10, '{\"level\":3,\"correct\":true,\"word\":\"astronauta\",\"selected\":\"\\n                astronauta            \",\"timestamp\":\"2025-07-28 19:06:58\"}', '2025-07-28 17:06:58'),
-(58, 1, 'auditory-codes', NULL, 10, '{\"level\":3,\"correct\":true,\"word\":\"biblioteca\",\"selected\":\"\\n                biblioteca            \",\"timestamp\":\"2025-07-28 19:07:00\"}', '2025-07-28 17:07:00'),
-(59, 1, 'auditory-codes', NULL, 10, '{\"level\":3,\"correct\":true,\"word\":\"libro\",\"selected\":\"\\n                libro            \",\"timestamp\":\"2025-07-28 19:07:06\"}', '2025-07-28 17:07:06');
+INSERT INTO `user_progress` (`id`, `user_id`, `game_type`, `level`, `score`, `details`, `timestamp`, `is_restart`) VALUES
+(71, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"flor\",\"selected\":\"\\n                flor            \",\"timestamp\":\"2025-07-28 20:11:53\"}', '2025-07-28 18:11:53', 0),
+(72, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"sol\",\"selected\":\"\\n                sol            \",\"timestamp\":\"2025-07-28 20:11:56\"}', '2025-07-28 18:11:56', 0),
+(73, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"casa\",\"selected\":\"\\n                casa            \",\"timestamp\":\"2025-07-28 20:11:59\"}', '2025-07-28 18:11:59', 0),
+(74, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"sol\",\"selected\":\"\\n                sol            \",\"timestamp\":\"2025-07-28 20:12:01\"}', '2025-07-28 18:12:01', 0),
+(75, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"zapato\",\"selected\":\"\\n                zapato            \",\"timestamp\":\"2025-07-28 20:12:03\"}', '2025-07-28 18:12:03', 0),
+(76, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"flor\",\"selected\":\"\\n                flor            \",\"timestamp\":\"2025-07-28 20:12:05\"}', '2025-07-28 18:12:05', 0),
+(77, 1, 'auditory-codes', NULL, 0, '{\"level\":1,\"correct\":false,\"word\":\"sol\",\"selected\":\"\\n                sal            \",\"timestamp\":\"2025-07-28 20:12:07\"}', '2025-07-28 18:12:07', 0),
+(78, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"sol\",\"selected\":\"\\n                sol            \",\"timestamp\":\"2025-07-28 20:12:09\"}', '2025-07-28 18:12:09', 0),
+(79, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"zapato\",\"selected\":\"\\n                zapato            \",\"timestamp\":\"2025-07-28 20:12:11\"}', '2025-07-28 18:12:11', 0),
+(80, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"flor\",\"selected\":\"\\n                flor            \",\"timestamp\":\"2025-07-28 20:12:13\"}', '2025-07-28 18:12:13', 0),
+(81, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"flor\",\"selected\":\"\\n                flor            \",\"timestamp\":\"2025-07-28 20:12:15\"}', '2025-07-28 18:12:15', 0),
+(82, 1, 'letter-detective', NULL, 5, '{\"level\":1,\"score\":5,\"correct_answers\":1,\"total_pairs\":6,\"lives_remaining\":0,\"timestamp\":\"2025-07-29 00:55:14\"}', '2025-07-28 22:55:14', 0),
+(83, 1, 'letter-detective', NULL, 15, '{\"level\":1,\"score\":15,\"correct_answers\":3,\"total_pairs\":6,\"lives_remaining\":0,\"timestamp\":\"2025-07-29 00:55:27\"}', '2025-07-28 22:55:27', 0),
+(84, 1, 'letter-detective', NULL, 0, '{\"level\":1,\"correct\":null,\"selected\":\"\",\"correct_letter\":\"\",\"timestamp\":\"2025-07-29 01:03:43\"}', '2025-07-28 23:03:43', 0);
 
 -- --------------------------------------------------------
 
@@ -453,13 +351,6 @@ ALTER TABLE `stories`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indices de la tabla `story_elements`
---
-ALTER TABLE `story_elements`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `story_id` (`story_id`);
-
---
 -- Indices de la tabla `users`
 --
 ALTER TABLE `users`
@@ -494,7 +385,7 @@ ALTER TABLE `game_options`
 -- AUTO_INCREMENT de la tabla `letter_pairs`
 --
 ALTER TABLE `letter_pairs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de la tabla `rhymes`
@@ -506,13 +397,7 @@ ALTER TABLE `rhymes`
 -- AUTO_INCREMENT de la tabla `stories`
 --
 ALTER TABLE `stories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT de la tabla `story_elements`
---
-ALTER TABLE `story_elements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `users`
@@ -524,13 +409,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `user_progress`
 --
 ALTER TABLE `user_progress`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
 
 --
 -- AUTO_INCREMENT de la tabla `words`
 --
 ALTER TABLE `words`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- Restricciones para tablas volcadas
@@ -541,12 +426,6 @@ ALTER TABLE `words`
 --
 ALTER TABLE `game_options`
   ADD CONSTRAINT `game_options_ibfk_1` FOREIGN KEY (`word_id`) REFERENCES `words` (`id`);
-
---
--- Filtros para la tabla `story_elements`
---
-ALTER TABLE `story_elements`
-  ADD CONSTRAINT `story_elements_ibfk_1` FOREIGN KEY (`story_id`) REFERENCES `stories` (`id`);
 
 --
 -- Filtros para la tabla `user_progress`

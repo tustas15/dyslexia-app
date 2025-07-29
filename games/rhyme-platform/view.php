@@ -1,8 +1,5 @@
 <?php
-// Verificar si se cargaron los datos correctamente
-if (!isset($game_data)) {
-    die("Error: Datos del juego no disponibles.");
-}
+if (!isset($game_data)) die("Error: Datos del juego no disponibles.");
 
 $targetWord = $game_data['target_word'] ?? 'sol';
 $words = $game_data['words'] ?? ['col', 'gol', 'pan', 'sal', 'pez'];
@@ -11,339 +8,545 @@ $level = $game_data['level'] ?? 1;
 ?>
 <?php ob_start(); ?>
 
-<div class="game-container platform">
-  <h1>Saltarima <small>Nivel <?= $level ?></small></h1>
-  
-  <div class="game-instructions">
-    <p>¡Salta solo sobre las palabras que riman con la palabra objetivo!</p>
-    <button class="audio-btn" id="play-instructions">
-      <i class="fas fa-volume-up"></i> Escuchar instrucciones
-    </button>
-  </div>
-  
-  <div class="target-box">
-    <p>Palabra objetivo:</p>
-    <div class="target-word"><?= htmlspecialchars($targetWord) ?></div>
-    <button class="audio-btn" id="play-target-word">
-      <i class="fas fa-volume-up"></i>
-    </button>
-  </div>
-  
-  <div class="platform-game">
-    <?php foreach($words as $word): ?>
-      <?php $isRhyme = in_array($word, $rhymes); ?>
-      <div class="platform" 
-           data-rhyme="<?= $isRhyme ? '1' : '0' ?>"
-           data-word="<?= htmlspecialchars($word) ?>"
-           onclick="jump(this)">
-        <span class="platform-word"><?= htmlspecialchars($word) ?></span>
-      </div>
-    <?php endforeach; ?>
-  </div>
-  
-  <div class="character" id="character">🤸</div>
-  
-  <div class="feedback">
-    <div class="result-icon"></div>
-    <p class="message"></p>
-    <button class="next-btn hidden" id="next-btn">Siguiente</button>
-  </div>
-  
-  <div class="game-stats">
-    <p>Puntuación: <span id="score">0</span></p>
-    <p>Vidas: <span id="lives">3</span></p>
-  </div>
+<!-- Incluir Anime.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+<div class="game-container platform min-h-screen py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Encabezado con progreso -->
+        <div class="flex flex-wrap items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-blue-700">Saltarima</h1>
+                <p class="text-lg text-gray-600">Nivel <?= $level ?></p>
+            </div>
+
+            <div class="w-full md:w-auto mt-4 md:mt-0">
+                <div class="flex items-center mb-2">
+                    <span class="text-gray-700 mr-2">Progreso:</span>
+                    <div class="w-48 h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="h-full bg-green-500 transition-all duration-500" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-star text-yellow-400 mr-2"></i>
+                        <span id="score" class="font-bold">0</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-heart text-red-500 mr-2"></i>
+                        <span id="lives" class="font-bold">3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instrucciones con audio -->
+        <div class="bg-blue-50 rounded-xl p-6 mb-8 text-center">
+            <p class="text-lg mb-4">¡Salta solo sobre las palabras que riman con la palabra objetivo!</p>
+            <button id="play-instructions" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg flex items-center mx-auto">
+                <i class="fas fa-volume-up mr-2"></i> Escuchar instrucciones
+            </button>
+        </div>
+
+        <!-- Palabra objetivo con audio -->
+        <div class="target-box bg-white rounded-xl shadow-md p-6 mb-8 text-center">
+            <p class="text-xl font-semibold text-gray-700 mb-2">Palabra objetivo:</p>
+            <div class="flex items-center justify-center">
+                <div class="target-word text-4xl font-bold text-indigo-700 py-3 px-6 bg-indigo-50 rounded-lg">
+                    <?= htmlspecialchars($targetWord) ?>
+                </div>
+                <button id="play-target-word" class="ml-4 bg-indigo-500 hover:bg-indigo-600 text-white p-3 rounded-full">
+                    <i class="fas fa-volume-up text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Área de juego -->
+        <div class="platform-game relative bg-gradient-to-b from-blue-100 to-cyan-100 rounded-2xl p-6 shadow-lg min-h-[500px]">
+            <?php foreach ($words as $index => $word): ?>
+                <?php $isRhyme = in_array($word, $rhymes); ?>
+                <div class="platform absolute cursor-pointer transform transition-transform duration-300 hover:scale-105"
+                    style="left: <?= rand(5, 85) ?>%; top: <?= rand(100, 300) ?>px;"
+                    data-rhyme="<?= $isRhyme ? '1' : '0' ?>"
+                    data-word="<?= htmlspecialchars($word) ?>"
+                    onclick="jump(this)">
+                    <div class="platform-inner bg-gradient-to-r <?= $isRhyme ? 'from-green-400 to-emerald-400' : 'from-yellow-400 to-orange-400' ?> rounded-lg px-4 py-2 shadow-md">
+                        <span class="platform-word text-white font-bold text-lg"><?= htmlspecialchars($word) ?></span>
+                    </div>
+                    <button class="play-word-btn absolute -right-2 -top-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md">
+                        <i class="fas fa-volume-up text-xs"></i>
+                    </button>
+                </div>
+            <?php endforeach; ?>
+
+            <div class="character absolute bottom-10 left-1/2 transform -translate-x-1/2" id="character">
+                <div class="text-6xl">🤸</div>
+            </div>
+        </div>
+
+        <!-- Feedback y controles -->
+        <div class="feedback mt-8 text-center">
+            <div class="result-icon mb-4">
+                <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mx-auto">
+                    <i class="fas fa-question text-2xl text-gray-500"></i>
+                </div>
+            </div>
+            <p class="message text-xl font-semibold text-gray-700 mb-4">Encuentra las palabras que riman con <?= htmlspecialchars($targetWord) ?></p>
+
+            <div class="flex justify-center space-x-4">
+                <button id="hint-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-6 rounded-lg">
+                    <i class="fas fa-lightbulb mr-2"></i> Pista
+                </button>
+                <button id="next-btn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg hidden">
+                    <i class="fas fa-arrow-right mr-2"></i> Siguiente
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-// Estado del juego
-let score = 0;
-let lives = 3;
-let currentLevel = <?= $level ?>;
-let targetWord = "<?= $targetWord ?>";
-let rhymes = <?= json_encode($rhymes) ?>;
-let character = document.getElementById('character');
+    // Estado del juego
+    const gameState = {
+        score: 0,
+        lives: 3,
+        currentLevel: <?= $level ?>,
+        targetWord: "<?= $targetWord ?>",
+        rhymes: <?= json_encode($rhymes) ?>,
+        foundRhymes: 0,
+        totalRhymes: <?= count($rhymes) ?>,
+        character: document.getElementById('character'),
+        speech: window.speechSynthesis,
+        jumping: false, // Para evitar saltos múltiples simultáneos
+        completedWords: [] // Palabras objetivo ya completadas
+    };
 
-// Elementos DOM
-const scoreElement = document.getElementById('score');
-const livesElement = document.getElementById('lives');
-const nextBtn = document.getElementById('next-btn');
-const messageElement = document.querySelector('.message');
-const resultIcon = document.querySelector('.result-icon');
+    // Elementos DOM
+    const dom = {
+        score: document.getElementById('score'),
+        lives: document.getElementById('lives'),
+        nextBtn: document.getElementById('next-btn'),
+        message: document.querySelector('.message'),
+        resultIcon: document.querySelector('.result-icon'),
+        progressBar: document.getElementById('progress-bar'),
+        hintBtn: document.getElementById('hint-btn'),
+        targetWord: document.querySelector('.target-word'),
+        playTargetWord: document.getElementById('play-target-word')
+    };
 
-// Audios
-const targetWordAudio = new Howl({
-    src: ['<?= get_audio('rhymes', $targetWord . '.mp3') ?>']
-});
+    // Inicializar juego
+    function initGame() {
+        updateUI();
 
-const instructionsAudio = new Howl({
-    src: ['<?= get_audio('common', 'instructions_rhyme.mp3') ?>']
-});
+        // Configurar eventos
+        document.getElementById('play-instructions').addEventListener('click', playInstructions);
+        dom.playTargetWord.addEventListener('click', () => speakWord(gameState.targetWord));
 
-const successAudio = new Howl({
-    src: ['<?= get_audio('common', 'success.mp3') ?>']
-});
+        // Configurar botones de audio para cada palabra
+        document.querySelectorAll('.play-word-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const word = btn.parentElement.dataset.word;
+                speakWord(word);
+            });
+        });
 
-const errorAudio = new Howl({
-    src: ['<?= get_audio('common', 'error.mp3') ?>']
-});
+        // Configurar botón de pista
+        dom.hintBtn.addEventListener('click', showHint);
 
-// Reproducir instrucciones
-document.getElementById('play-instructions').addEventListener('click', () => {
-    instructionsAudio.play();
-});
+        // Configurar botón siguiente
+        dom.nextBtn.addEventListener('click', loadNextWord);
+    }
 
-// Reproducir palabra objetivo
-document.getElementById('play-target-word').addEventListener('click', () => {
-    targetWordAudio.play();
-});
+    // Actualizar UI con estado actual
+    function updateUI() {
+        dom.score.textContent = gameState.score;
+        dom.lives.textContent = gameState.lives;
+        dom.progressBar.style.width = `${(gameState.foundRhymes / gameState.totalRhymes) * 100}%`;
+    }
 
-function jump(platform) {
-    const isRhyme = platform.dataset.rhyme === "1";
-    const word = platform.dataset.word;
-    
-    // Animación de salto
-    anime({
-        targets: character,
-        bottom: [0, platform.offsetTop],
-        easing: 'easeOutQuad',
-        duration: 800,
-        complete: function() {
-            if (isRhyme) {
-                handleCorrectJump(platform, word);
+    // Hablar una palabra usando TTS
+    function speakWord(word) {
+        if (gameState.speech.speaking) gameState.speech.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(word);
+        utterance.lang = 'es-ES';
+        utterance.rate = 0.9;
+        utterance.pitch = 1.2; // Más amigable para niños
+        gameState.speech.speak(utterance);
+    }
+
+    // Reproducir instrucciones
+    function playInstructions() {
+        const text = "Salta solo sobre las palabras que riman con " + gameState.targetWord;
+        speakWord(text);
+    }
+
+    // Mostrar pista
+    function showHint() {
+        const randomRhyme = gameState.rhymes[Math.floor(Math.random() * gameState.rhymes.length)];
+        speakWord("Busca palabras como " + randomRhyme);
+
+        // Destacar una rima aleatoria
+        const platforms = document.querySelectorAll('.platform[data-rhyme="1"]');
+        if (platforms.length > 0) {
+            const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
+
+            anime({
+                targets: randomPlatform,
+                scale: [1, 1.3, 1],
+                duration: 1000,
+                easing: 'easeInOutQuad'
+            });
+        }
+    }
+
+    // Manejar salto a plataforma
+    function jump(platform) {
+        // Evitar saltos múltiples simultáneos
+        if (gameState.jumping) return;
+        gameState.jumping = true;
+
+        const isRhyme = platform.dataset.rhyme === "1";
+        const word = platform.dataset.word;
+
+        // Obtener posición de la plataforma
+        const platformRect = platform.getBoundingClientRect();
+        const gameArea = document.querySelector('.platform-game');
+        const gameRect = gameArea.getBoundingClientRect();
+
+        // Calcular posición relativa dentro del área de juego
+        const relativeY = platformRect.top - gameRect.top;
+
+        // Animación de salto
+        anime({
+            targets: gameState.character,
+            bottom: [30, relativeY + 20], // Ajuste de posición
+            easing: 'easeOutQuad',
+            duration: 800,
+            complete: function() {
+                if (isRhyme) {
+                    handleCorrectJump(platform, word);
+                } else {
+                    handleIncorrectJump(platform, word);
+                }
+
+                // Volver a posición inicial
+                anime({
+                    targets: gameState.character,
+                    bottom: 30,
+                    duration: 500,
+                    complete: () => gameState.jumping = false
+                });
+            }
+        });
+    }
+
+    // Manejar salto correcto
+    function handleCorrectJump(platform, word) {
+        // Actualizar estado
+        gameState.score += 10;
+        gameState.foundRhymes++;
+
+        // Actualizar UI
+        updateUI();
+
+        // Feedback visual
+        platform.style.opacity = '0';
+        platform.style.pointerEvents = 'none';
+        dom.resultIcon.innerHTML = '<div class="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center mx-auto"><i class="fas fa-check text-2xl text-white"></i></div>';
+        dom.message.textContent = `¡Correcto! "${word}" rima con "${gameState.targetWord}"`;
+        dom.message.className = 'message text-xl font-semibold text-green-600 mb-4';
+
+        // Sonido
+        playSuccessSound();
+
+        // Función para avanzar al siguiente nivel
+        function advanceToNextLevel() {
+            const nextLevel = gameState.currentLevel + 1;
+
+            if (nextLevel > 3) {
+                // Si es el último nivel, mostrar pantalla de finalización
+                window.location.href = 'level_complete.php?level=3';
             } else {
-                handleIncorrectJump(platform, word);
+                // Recargar la página con el nuevo nivel
+                window.location.href = `index.php?level=${nextLevel}`;
             }
         }
-    });
-}
+        // Verificar si se completó el nivel
+        if (gameState.foundRhymes >= gameState.totalRhymes) {
+            dom.message.textContent = '¡Palabras completadas!';
+            dom.nextBtn.classList.remove('hidden');
 
-function handleCorrectJump(platform, word) {
-    // Éxito
-    platform.classList.add('activated');
-    score += 10;
-    scoreElement.textContent = score;
-    
-    // Feedback
-    resultIcon.className = 'result-icon correct';
-    resultIcon.innerHTML = '<i class="fas fa-check"></i>';
-    messageElement.textContent = `¡Correcto! "${word}" rima con "${targetWord}"`;
-    
-    // Sonido
-    successAudio.play();
-    
-    // Ocultar plataforma después de un tiempo
-    setTimeout(() => {
-        platform.style.visibility = 'hidden';
-    }, 1000);
-    
-    // Verificar si todas las rimas están activadas
-    const allRhymesActivated = document.querySelectorAll('.platform[data-rhyme="1"]:not(.activated)').length === 0;
-    if (allRhymesActivated) {
-        messageElement.textContent += ' ¡Nivel completado!';
-        nextBtn.classList.remove('hidden');
+            // Cambiar el botón "Siguiente" para avanzar de nivel
+            dom.nextBtn.textContent = 'Siguiente Nivel';
+            dom.nextBtn.onclick = advanceToNextLevel;
+            dom.nextBtn.classList.remove('hidden');
+
+            // Guardar progreso
+            saveProgress(true);
+        }
     }
-}
 
-function handleIncorrectJump(platform, word) {
-    // Error
-    platform.classList.add('error');
-    lives--;
-    livesElement.textContent = lives;
-    
-    // Feedback
-    resultIcon.className = 'result-icon incorrect';
-    resultIcon.innerHTML = '<i class="fas fa-times"></i>';
-    messageElement.textContent = `¡Error! "${word}" no rima con "${targetWord}"`;
-    
-    // Sonido
-    errorAudio.play();
-    
-    // Animación de caída
-    anime({
-        targets: character,
-        bottom: [character.offsetTop, -100],
-        easing: 'easeInQuad',
-        duration: 500
-    });
-    
-    // Verificar fin del juego
-    if (lives <= 0) {
-        setTimeout(() => {
-            endGame();
-        }, 1000);
+    // Manejar salto incorrecto
+    function handleIncorrectJump(platform, word) {
+        // Actualizar estado
+        gameState.lives--;
+
+        // Actualizar UI
+        updateUI();
+
+        // Feedback visual
+        anime({
+            targets: platform,
+            translateX: [0, 10, -10, 10, -10, 0],
+            duration: 600,
+            easing: 'easeInOutQuad'
+        });
+
+        dom.resultIcon.innerHTML = '<div class="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center mx-auto"><i class="fas fa-times text-2xl text-white"></i></div>';
+        dom.message.textContent = `¡Error! "${word}" no rima con "${gameState.targetWord}"`;
+        dom.message.className = 'message text-xl font-semibold text-red-600 mb-4';
+
+        // Sonido
+        playErrorSound();
+
+        // Verificar fin del juego
+        if (gameState.lives <= 0) {
+            setTimeout(() => {
+                dom.message.textContent = '¡Juego terminado! Puntuación final: ' + gameState.score;
+                dom.nextBtn.textContent = 'Reintentar';
+                dom.nextBtn.classList.remove('hidden');
+                dom.nextBtn.onclick = restartGame;
+
+                // Guardar progreso
+                saveProgress(false);
+            }, 1000);
+        }
     }
-}
 
-function endGame() {
-    messageElement.textContent = `¡Juego terminado! Puntuación final: ${score}`;
-    nextBtn.textContent = 'Reintentar';
-    nextBtn.classList.remove('hidden');
-    nextBtn.onclick = function() {
-        location.reload();
+    // Función para generar un beep simple (alternativa)
+    function beep(frequency, duration) {
+        try {
+            const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.type = 'sine';
+            oscillator.frequency.value = frequency;
+            gainNode.gain.value = 0.3;
+
+            oscillator.start();
+            setTimeout(() => {
+                oscillator.stop();
+            }, duration);
+        } catch (e) {
+            console.error('No se pudo generar beep:', e);
+        }
+    }
+
+    // Sonidos en formato base64
+    const sounds = {
+        success: "data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV",
+        error: "data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSC CBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"
     };
-    
-    // Guardar puntuación
-    saveScore();
-}
 
-function nextLevel() {
-    const nextLevel = currentLevel + 1;
-    window.location.href = `?level=${nextLevel}`;
-}
+    // Reproducir sonido de éxito
+    function playSuccessSound() {
+        try {
+            const audio = new Audio(sounds.success);
+            audio.play().catch(e => {
+                console.error('Error al reproducir sonido de éxito:', e);
+                beep(523.25, 200); // Do como respaldo
+            });
+        } catch (e) {
+            console.error('Error al reproducir sonido de éxito:', e);
+            beep(523.25, 200); // Do como respaldo
+        }
+    }
 
-function saveScore() {
-    fetch('/api/save-progress.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            game: 'rhyme-platform',
-            level: currentLevel,
-            score: score,
-            lives: lives
-        })
-    });
-}
+    // Reproducir sonido de error
+    function playErrorSound() {
+        try {
+            const audio = new Audio(sounds.error);
+            audio.play().catch(e => {
+                console.error('Error al reproducir sonido de error:', e);
+                beep(261.63, 300); // Do bajo como respaldo
+            });
+        } catch (e) {
+            console.error('Error al reproducir sonido de error:', e);
+            beep(261.63, 300); // Do bajo como respaldo
+        }
+    }
 
-// Configurar botón siguiente
-nextBtn.addEventListener('click', nextLevel);
+    // Guardar progreso en el servidor
+    function saveProgress(levelCompleted) {
+        fetch('../../api/save-progress.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                game: 'rhyme-platform',
+                level: gameState.currentLevel,
+                score: gameState.score,
+                lives: gameState.lives,
+                completed: levelCompleted
+            })
+        }).catch(error => console.error('Error al guardar progreso:', error));
+    }
+
+    // Cargar nueva palabra
+    function loadNextWord() {
+        // Ocultar botón siguiente
+        dom.nextBtn.classList.add('hidden');
+
+        // Restablecer estado para nueva palabra
+        gameState.foundRhymes = 0;
+
+        // Mostrar mensaje de carga
+        dom.message.textContent = 'Cargando nueva palabra...';
+        dom.resultIcon.innerHTML = '<div class="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center mx-auto"><i class="fas fa-spinner fa-spin text-2xl text-white"></i></div>';
+
+        // Obtener nueva palabra del servidor
+        fetch(`../../api/game-data.php?game=rhyme-platform&level=${gameState.currentLevel}`)
+            .then(response => response.json())
+            .then(data => {
+                // Actualizar estado del juego con nueva palabra
+                gameState.targetWord = data.target_word;
+                gameState.rhymes = data.rhymes;
+                gameState.totalRhymes = data.rhymes.length;
+
+                // Actualizar UI
+                dom.targetWord.textContent = gameState.targetWord;
+                dom.message.textContent = `Encuentra las palabras que riman con ${gameState.targetWord}`;
+                dom.resultIcon.innerHTML = '<div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mx-auto"><i class="fas fa-question text-2xl text-gray-500"></i></div>';
+
+                // Actualizar área de juego
+                const gameArea = document.querySelector('.platform-game');
+                gameArea.querySelectorAll('.platform').forEach(platform => platform.remove());
+
+                // Agregar nuevas plataformas
+                data.words.forEach(word => {
+                    const isRhyme = data.rhymes.includes(word);
+                    const topPosition = Math.floor(Math.random() * 300) + 50;
+                    const leftPosition = Math.floor(Math.random() * 80) + 5;
+
+                    const platform = document.createElement('div');
+                    platform.className = 'platform absolute cursor-pointer transform transition-transform duration-300 hover:scale-105';
+                    platform.style.left = `${leftPosition}%`;
+                    platform.style.top = `${topPosition}px`;
+                    platform.dataset.rhyme = isRhyme ? '1' : '0';
+                    platform.dataset.word = word;
+                    platform.onclick = function() {
+                        jump(this);
+                    };
+
+                    platform.innerHTML = `
+                    <div class="platform-inner bg-gradient-to-r ${isRhyme ? 'from-green-400 to-emerald-400' : 'from-yellow-400 to-orange-400'} rounded-lg px-4 py-2 shadow-md">
+                        <span class="platform-word text-white font-bold text-lg">${word}</span>
+                    </div>
+                    <button class="play-word-btn absolute -right-2 -top-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md">
+                        <i class="fas fa-volume-up text-xs"></i>
+                    </button>
+                `;
+
+                    gameArea.appendChild(platform);
+                });
+
+                // Configurar botones de audio para las nuevas palabras
+                document.querySelectorAll('.play-word-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const word = btn.parentElement.dataset.word;
+                        speakWord(word);
+                    });
+                });
+
+                // Reproducir nueva palabra objetivo
+                speakWord(gameState.targetWord);
+
+                // Actualizar barra de progreso
+                updateUI();
+            })
+            .catch(error => {
+                console.error('Error al cargar nueva palabra:', error);
+                dom.message.textContent = 'Error al cargar nueva palabra. Intenta de nuevo.';
+                dom.nextBtn.classList.remove('hidden');
+            });
+    }
+
+    // Reiniciar juego
+    function restartGame() {
+        location.reload();
+    }
+
+    // Inicializar el juego cuando se cargue la página
+    document.addEventListener('DOMContentLoaded', initGame);
 </script>
 
 <style>
-.game-container.platform {
-    position: relative;
-    height: 80vh;
-    max-width: 800px;
-    margin: 0 auto;
-    overflow: hidden;
-}
+    .platform-game {
+        position: relative;
+        overflow: hidden;
+        height: 500px;
+        /* Altura fija para mejor cálculo */
+    }
 
-.game-instructions {
-    text-align: center;
-    margin-bottom: 20px;
-}
+    .platform {
+        transition: transform 0.3s, opacity 0.5s;
+        z-index: 10;
+        transform: translateY(0);
+    }
 
-.target-box {
-    text-align: center;
-    margin-bottom: 20px;
-    background-color: #e3f2fd;
-    padding: 15px;
-    border-radius: 15px;
-    display: inline-flex;
-    align-items: center;
-    gap: 15px;
-    margin: 0 auto 30px;
-    display: block;
-}
+    .platform-inner {
+        transition: all 0.3s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 12px 20px;
+    }
 
-.target-word {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #43658b;
-    margin: 10px 0;
-}
+    .character {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 20;
+        will-change: bottom;
+        transition: bottom 0.5s ease;
+    }
 
-.platform-game {
-    position: relative;
-    height: 400px;
-    background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
+    .result-icon {
+        transition: all 0.5s ease;
+    }
 
-.platform {
-    position: absolute;
-    width: 100px;
-    height: 30px;
-    background-color: #8BC34A;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    font-weight: bold;
-    color: white;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-}
+    .platform-word {
+        user-select: none;
+        font-size: 1.25rem;
+    }
 
-.platform:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 10px rgba(0,0,0,0.15);
-}
+    /* Animación de salto para el personaje */
+    @keyframes jump {
+        0% {
+            bottom: 30px;
+        }
 
-.platform.activated {
-    background-color: #4CAF50;
-    box-shadow: 0 0 20px rgba(76, 175, 80, 0.7);
-    animation: glow 1s infinite alternate;
-}
+        50% {
+            bottom: 200px;
+        }
 
-.platform.error {
-    background-color: #f44336;
-    box-shadow: 0 0 20px rgba(244, 67, 54, 0.7);
-}
+        100% {
+            bottom: 30px;
+        }
+    }
 
-@keyframes glow {
-    from { box-shadow: 0 0 10px rgba(76, 175, 80, 0.7); }
-    to { box-shadow: 0 0 30px rgba(76, 175, 80, 1); }
-}
-
-.character {
-    position: absolute;
-    bottom: 0;
-    left: 50px;
-    font-size: 3rem;
-    z-index: 10;
-    transition: bottom 0.8s ease;
-    transform: translateX(-50%);
-}
-
-.feedback {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.result-icon {
-    font-size: 3rem;
-    margin-bottom: 10px;
-}
-
-.result-icon.correct {
-    color: #4CAF50;
-}
-
-.result-icon.incorrect {
-    color: #f44336;
-}
-
-.message {
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-}
-
-.next-btn {
-    background-color: #4e89ae;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 50px;
-    font-size: 1.1rem;
-    cursor: pointer;
-}
-
-.game-stats {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 10px 15px;
-    border-radius: 10px;
-    font-weight: bold;
-}
+    .character.jumping {
+        animation: jump 0.8s ease;
+    }
 </style>
 <?php
 $content = ob_get_clean();
