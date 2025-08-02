@@ -4,14 +4,7 @@ require_once '../includes/database.php';
 require_once '../includes/auth.php';
 require_once '../includes/helpers.php';
 
-// Configurar para mostrar errores solo en desarrollo
-if (ENVIRONMENT === 'development') {
-    ini_set('display_errors', 1);
-    error_reporting(E_ALL);
-} else {
-    ini_set('display_errors', 0);
-    error_reporting(0);
-}
+
 
 header('Content-Type: application/json');
 safe_session_start();

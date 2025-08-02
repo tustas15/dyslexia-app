@@ -4,17 +4,20 @@ function get_asset($type, $path)
     return ASSETS_PATH . "/$type/$path";
 }
 
-function get_audio($game, $file)
-{
-    // Verificar si el archivo existe
-    $audio_path = $_SERVER['DOCUMENT_ROOT'] . "/dyslexia-app/assets/audios/$game/$file";
-
-    if (!file_exists($audio_path)) {
-        // Usar un archivo de respaldo si no existe
+function get_audio($game, $file) {
+    $game_path = "{$_SERVER['DOCUMENT_ROOT']}/dyslexia-app/assets/audios/$game/$file";
+    $default_path = "{$_SERVER['DOCUMENT_ROOT']}/dyslexia-app/assets/audios/default.mp3";
+    
+    // Verificar si existe el archivo específico
+    if (file_exists($game_path)) {
+        return BASE_URL . "/assets/audios/$game/$file";
+    }
+    // Verificar si existe el respaldo
+    elseif (file_exists($default_path)) {
         return BASE_URL . "/assets/audios/default.mp3";
     }
-
-    return BASE_URL . "/assets/audios/$game/$file";
+    // Retornar cadena vacía si no hay ningún audio
+    return '';
 }
 
 function get_image($category, $file)
@@ -98,4 +101,26 @@ function get_word_image($word) {
     
     // Fallback a servicio público
     return "https://source.unsplash.com/featured/200x200/?$keywords";
+}
+
+// Función para verificar soporte TTS (versión PHP)
+function tts_supported() {
+    // En PHP no podemos verificar directamente el soporte del navegador
+    // Asumimos soporte y manejamos la compatibilidad en el cliente
+    return true;
+}
+
+// Función para obtener idioma del usuario
+function get_user_language() {
+    $lang = 'es-ES'; // Default
+    
+    if (isset($_SESSION['language'])) {
+        return $_SESSION['language'];
+    }
+    
+    if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+        $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 5);
+    }
+    
+    return $lang;
 }

@@ -68,6 +68,27 @@ if ($game_type === 'letter-detective') {
         'completed' => $data['completed'] ?? false,
         'timestamp' => date('Y-m-d H:i:s')
     ]);
+} else if ($game_type === 'syllable-hunt') {
+    $score = $data['correct'] ? 10 : 0;
+    $details = json_encode([
+        'level' => $level,
+        'correct' => $data['correct'],
+        'word' => $data['word'] ?? '',
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
+
+    // Actualizar progreso en sesión
+    if ($data['correct'] && isset($_SESSION['syllable_progress'])) {
+        $_SESSION['syllable_progress']['words_completed']++;
+    }
+} else if ($game_type === 'syllable-hunt') {
+    $score = $data['correct'] ? 10 : 0;
+    $details = json_encode([
+        'level' => $level,
+        'correct' => $data['correct'],
+        'word' => $data['word'] ?? '',
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
 } else {
     // Lógica para otros juegos
     $score = $data['correct'] ? 10 : 0;
