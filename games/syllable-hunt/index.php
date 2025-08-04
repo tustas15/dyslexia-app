@@ -30,17 +30,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         // Verificar si se completó el nivel
         if ($_SESSION['syllable_progress']['words_completed'] >= 3) {
             // Guardar progreso en la base de datos
-            $score = 30; // 10 puntos por palabra * 3 palabras
+            $score = 30;
             $details = json_encode([
                 'level' => $level,
                 'completed' => true,
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
 
+            // Crear variables para pasar por referencia
+            $user_id = $_SESSION['user_id'];
+            $game_type = 'syllable-hunt';
+
             $stmt = $db->prepare("INSERT INTO user_progress 
-                                (user_id, game_type, score, details) 
-                                VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("isis", $_SESSION['user_id'], 'syllable-hunt', $score, $details);
+                            (user_id, game_type, score, details) 
+                            VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("isis", $user_id, $game_type, $score, $details);
             $stmt->execute();
 
             // Redirigir a pantalla de nivel completado
@@ -87,28 +91,49 @@ $difficulty = $difficulty_map[$level] ?? 'easy';
 // Determinar número de sílabas según nivel
 $syllable_count = 2;
 if ($level == 2) $syllable_count = 3;
-if ($level == 3) $syllable_count = 4;
+if ($level == 3) $syllable_count = 3;  // Cambiado de 4 a 3
 
 // Consulta para palabras con el número de sílabas requerido
-$sql = "SELECT id, word, syllables, image_path, audio_path 
-        FROM words 
-        WHERE difficulty = ? 
-        AND LENGTH(syllables) - LENGTH(REPLACE(syllables, '-', '')) + 1 = ?
+$sql = "SELECT w.id, w.word, w.image_path, w.audio_path, wp.syllables 
+        FROM words w
+        JOIN word_painting_data wp ON w.id = wp.word_id
+        WHERE wp.difficulty = ? 
+        AND LENGTH(wp.syllables) - LENGTH(REPLACE(wp.syllables, '-', '')) + 1 = ?
         ORDER BY RAND() LIMIT 1";
 
-$stmt = $db->prepare($sql);
-$stmt->bind_param("si", $difficulty, $syllable_count);
-$stmt->execute();
-$result = $stmt->get_result();
+// Primera consulta con dificultad original
+$stmt1 = $db->prepare($sql);
+$stmt1->bind_param("si", $difficulty, $syllable_count);
+$stmt1->execute();
+$result = $stmt1->get_result();
 
-// Fallback si no hay palabras
+// Fallback si no hay palabras: buscar en cualquier dificultad
 if ($result->num_rows === 0) {
-    $stmt->bind_param("si", 'easy', $syllable_count);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $sql_fallback = "SELECT w.id, w.word, w.image_path, w.audio_path, wp.syllables 
+                     FROM words w
+                     JOIN word_painting_data wp ON w.id = wp.word_id
+                     WHERE LENGTH(wp.syllables) - LENGTH(REPLACE(wp.syllables, '-', '')) + 1 = ?
+                     ORDER BY RAND() LIMIT 1";
+    
+    $stmt_fallback = $db->prepare($sql_fallback);
+    $stmt_fallback->bind_param("i", $syllable_count);
+    $stmt_fallback->execute();
+    $result = $stmt_fallback->get_result();
 
     if ($result->num_rows === 0) {
-        die("No hay datos disponibles para este nivel.");
+        // Último recurso: usar cualquier palabra con el número de sílabas
+        $sql_last_chance = "SELECT w.id, w.word, w.image_path, w.audio_path, wp.syllables 
+                            FROM words w
+                            JOIN word_painting_data wp ON w.id = wp.word_id
+                            ORDER BY RAND() LIMIT 1";
+        
+        $stmt_last = $db->prepare($sql_last_chance);
+        $stmt_last->execute();
+        $result = $stmt_last->get_result();
+        
+        if ($result->num_rows === 0) {
+            die("No hay datos disponibles para este nivel.");
+        }
     }
 }
 

@@ -81,8 +81,9 @@ if ($game_type === 'letter-detective') {
     if ($data['correct'] && isset($_SESSION['syllable_progress'])) {
         $_SESSION['syllable_progress']['words_completed']++;
     }
-} else if ($game_type === 'syllable-hunt') {
-    $score = $data['correct'] ? 10 : 0;
+} else if ($game_type === 'word-painting') {
+    // Lógica específica para Pintando Palabras
+    $score = $data['correct'] ? 15 : 0;
     $details = json_encode([
         'level' => $level,
         'correct' => $data['correct'],

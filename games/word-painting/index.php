@@ -12,98 +12,110 @@ if (!is_logged_in()) {
 }
 
 $level = $_GET['level'] ?? 1;
+$game_data = get_word_painting_data($level);
 
-// Convertir nivel numérico a dificultad textual
-$difficulty_map = [
-    1 => 'easy',
-    2 => 'medium',
-    3 => 'hard'
-];
-$difficulty = $difficulty_map[$level] ?? 'easy';
-
-$sql = "SELECT id, word, audio_path, syllables 
-        FROM words 
-        WHERE difficulty = ? 
-        ORDER BY RAND() LIMIT 1";
-
-$stmt = $db->prepare($sql);
-$stmt->bind_param("s", $difficulty);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows === 0) {
-    // Intentar con dificultad fácil como respaldo
-    $stmt->bind_param("s", 'easy');
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows === 0) {
-        die("No hay datos disponibles para este nivel.");
-    }
+if (!$game_data) {
+    die("No hay datos disponibles para este nivel.");
 }
 
-$row = $result->fetch_assoc();
+$word = $game_data['word'];
+$syllables = $game_data['syllables'];
+$syllable_colors = $game_data['syllable_colors'];
+$level = $game_data['level'];
 
-// Generar letras de la palabra mezcladas con letras aleatorias
-$word = $row['word'];
-$word_letters = str_split($word);
-$all_letters = array_merge($word_letters, generate_random_letters(10, $word_letters));
-shuffle($all_letters);
+// Paleta de colores por defecto
+$default_colors = ['#FF6B6B', '#4D96FF', '#6BC777', '#FFD93D', '#FF9C6B', '#9B5DE5'];
 
-// Determinar colores por sílaba
-$syllables = explode('-', $row['syllables']);
-$syllable_colors = [];
-$colors = ['red', 'blue', 'green', 'yellow', 'orange', 'purple'];
+function hex2rgb($hex)
+{
+    $hex = str_replace('#', '', $hex);
+
+    if (strlen($hex) == 3) {
+        $r = hexdec($hex[0] . $hex[0]);
+        $g = hexdec($hex[1] . $hex[1]);
+        $b = hexdec($hex[2] . $hex[2]);
+    } else {
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+    }
+    return "rgb($r,$g,$b)";
+}
+
+// Crear mapa de sílabas para la palabra
+$syllableMap = [];
+$currentPosition = 0;
 foreach ($syllables as $index => $syllable) {
-    $syllable_colors[$syllable] = $colors[$index % count($colors)];
+    $length = mb_strlen($syllable, 'UTF-8');
+    for ($i = 0; $i < $length; $i++) {
+        $syllableMap[$currentPosition] = $index;
+        $currentPosition++;
+    }
 }
 
-// Asignar colores a las letras
-$letter_data = [];
-foreach ($all_letters as $letter) {
-    $color = '';
-    foreach ($syllables as $syllable) {
-        if (strpos($syllable, $letter) !== false) {
-            $color = $syllable_colors[$syllable];
-            break;
-        }
-    }
-    
-    $letter_data[] = [
-        'char' => $letter,
-        'color' => $color,
-        'is_target' => in_array($letter, $word_letters)
+// Crear array de letras objetivo con su índice de sílaba
+$target_letters_with_syllable = [];
+$word_letters = preg_split('//u', $word, -1, PREG_SPLIT_NO_EMPTY);
+for ($i = 0; $i < count($word_letters); $i++) {
+    $target_letters_with_syllable[] = [
+        'char' => $word_letters[$i],
+        'syllable_index' => $syllableMap[$i] ?? 0,
+        'position' => $i // Identificador único de posición
     ];
 }
 
-$game_data = [
-    'word' => $word,
-    'syllables' => $syllables,
-    'audio' => get_audio('painting', $row['audio_path']),
-    'letters' => $letter_data,
-    'level' => $level
-];
+// Generar letras distractoras
+$distractor_count = 10 + ($level * 3);
+$distractors = [];
 
-$content = ''; // Se generará en view.php
-include 'view.php';
+$alphabet = range('a', 'z');
+$available_letters = array_diff($alphabet, $word_letters);
 
-// Función para generar letras aleatorias que no estén en la palabra
-function generate_random_letters($count, $exclude_letters) {
-    $letters = range('a', 'z');
-    $random_letters = [];
-    
-    // Eliminar letras de la palabra y duplicados
-    $exclude_letters = array_unique($exclude_letters);
-    $available_letters = array_diff($letters, $exclude_letters);
-    
-    // Si no hay suficientes letras, repetir algunas
-    if (count($available_letters) < $count) {
-        $available_letters = array_merge($available_letters, $available_letters);
+for ($i = 0; $i < $distractor_count; $i++) {
+    if (empty($available_letters)) {
+        $available_letters = $alphabet;
     }
-    
-    for ($i = 0; $i < $count; $i++) {
-        $random_letters[] = $available_letters[array_rand($available_letters)];
-    }
-    
-    return $random_letters;
+    $distractors[] = $available_letters[array_rand($available_letters)];
 }
+
+// Crear array de todas las letras
+$all_letters = [];
+foreach ($target_letters_with_syllable as $letter_info) {
+    $all_letters[] = [
+        'char' => $letter_info['char'],
+        'is_target' => true,
+        'syllable_index' => $letter_info['syllable_index']
+    ];
+}
+foreach ($distractors as $letter) {
+    $all_letters[] = [
+        'char' => $letter,
+        'is_target' => false,
+        'syllable_index' => null
+    ];
+}
+shuffle($all_letters);
+
+// Preparar datos de letras para la vista
+$letter_data = [];
+foreach ($all_letters as $item) {
+    $color = '';
+    $is_target = $item['is_target'];
+
+    if ($is_target) {
+        $syllable_index = $item['syllable_index'];
+        $color_hex = $syllable_colors[$syllable_index] ?? ($default_colors[$syllable_index % count($default_colors)] ?? '#CCCCCC');
+        $color = hex2rgb($color_hex);
+    }
+
+    $letter_data[] = [
+        'char' => $item['char'],
+        'color' => $color,
+        'is_target' => $is_target,
+        'position' => $item['position'] ?? null // Nuevo campo
+    ];
+}
+
+// Pasar datos a la vista
+$game_data['letters'] = $letter_data;
+include 'view.php';

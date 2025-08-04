@@ -124,3 +124,49 @@ function get_user_language() {
     
     return $lang;
 }
+
+function get_word_painting_data($level = 1) {
+    global $db;
+    
+    $difficulty_map = [
+        1 => 'easy',
+        2 => 'medium',
+        3 => 'hard'
+    ];
+    $difficulty = $difficulty_map[$level] ?? 'easy';
+    
+    $sql = "SELECT w.id, w.word, w.audio_path, 
+                   wp.syllables, wp.syllable_colors
+            FROM words w
+            JOIN word_painting_data wp ON w.id = wp.word_id
+            WHERE wp.difficulty = ? 
+            ORDER BY RAND() LIMIT 1";
+    
+    $stmt = $db->prepare($sql);
+    $stmt->bind_param("s", $difficulty);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        // Reintentar con dificultad fácil si no hay resultados
+        $stmt->bind_param("s", 'easy');
+        $stmt->execute();
+        $result = $stmt->get_result();
+    }
+    
+    if ($result->num_rows === 0) {
+        return null;
+    }
+    
+    $row = $result->fetch_assoc();
+    $syllables = explode('-', $row['syllables']);
+    $syllable_colors = json_decode($row['syllable_colors'], true);
+    
+    return [
+        'word' => $row['word'],
+        'syllables' => $syllables,
+        'syllable_colors' => $syllable_colors,
+        'audio' => get_audio('painting', $row['audio_path']),
+        'level' => $level
+    ];
+}
