@@ -1,9 +1,6 @@
 <?php
-// level-complete.php
 require_once '../../includes/config.php';
-require_once '../../includes/database.php';
 require_once '../../includes/auth.php';
-require_once '../../includes/helpers.php';
 
 safe_session_start();
 
@@ -27,21 +24,23 @@ $next_level = min(3, $level + 1);
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full text-center">
         <div class="mb-6">
-            <i class="fas fa-book text-yellow-500 text-6xl mb-4"></i>
+            <i class="fas fa-robot text-blue-500 text-6xl mb-4"></i>
             <h1 class="text-3xl font-bold text-blue-700 mb-2">¡Nivel <?= $level ?> Completado!</h1>
-            <p class="text-xl text-gray-600">Has completado 3 historias en el nivel <?= $level ?></p>
+            <p class="text-xl text-gray-600">Has ayudado al robot a corregir todas las palabras</p>
         </div>
         
         <div class="bg-blue-50 rounded-xl p-6 mb-8">
             <div class="flex justify-center mb-6">
                 <div class="bg-white p-6 rounded-lg shadow-sm">
-                    <p class="text-gray-600">Historias completadas</p>
+                    <p class="text-gray-600">Palabras corregidas</p>
                     <p class="text-3xl font-bold text-blue-700">3/3</p>
                 </div>
             </div>
             
-            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                <div class="bg-green-500 h-4" style="width: 100%"></div>
+            <div class="stars flex justify-center mb-4">
+                <?php for ($i = 0; $i < 3; $i++): ?>
+                    <i class="fas fa-star text-yellow-400 text-3xl mx-1"></i>
+                <?php endfor; ?>
             </div>
         </div>
         

@@ -90,6 +90,21 @@ if ($game_type === 'letter-detective') {
         'word' => $data['word'] ?? '',
         'timestamp' => date('Y-m-d H:i:s')
     ]);
+} else if ($game_type === 'word-robot') {
+    $score = $data['correct'] ? 15 : 5; // 15 puntos por acierto, 5 por intento
+    $details = json_encode([
+        'level' => $level,
+        'correct' => $data['correct'],
+        'word' => $data['word'] ?? '',
+        'attempts' => $data['attempts'] ?? 0,
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
+
+    // Actualizar progreso en sesión
+    if ($data['correct'] && isset($_SESSION['robot_progress'])) {
+        $_SESSION['robot_progress']['current_word']++;
+        $_SESSION['robot_progress']['score'] += $score;
+    }
 } else {
     // Lógica para otros juegos
     $score = $data['correct'] ? 10 : 0;

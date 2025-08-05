@@ -4,19 +4,22 @@ function get_asset($type, $path)
     return ASSETS_PATH . "/$type/$path";
 }
 
-function get_audio($game, $file) {
+function get_audio($game, $file)
+{
+    // Añadir extensión .mp3 si no la tiene
+    if (pathinfo($file, PATHINFO_EXTENSION) === '') {
+        $file .= '.mp3';
+    }
+
     $game_path = "{$_SERVER['DOCUMENT_ROOT']}/dyslexia-app/assets/audios/$game/$file";
     $default_path = "{$_SERVER['DOCUMENT_ROOT']}/dyslexia-app/assets/audios/default.mp3";
-    
-    // Verificar si existe el archivo específico
+
     if (file_exists($game_path)) {
         return BASE_URL . "/assets/audios/$game/$file";
-    }
-    // Verificar si existe el respaldo
-    elseif (file_exists($default_path)) {
+    } elseif (file_exists($default_path)) {
         return BASE_URL . "/assets/audios/default.mp3";
     }
-    // Retornar cadena vacía si no hay ningún audio
+
     return '';
 }
 
@@ -49,119 +52,136 @@ function save_progress($user_id, $game_type, $score, $details)
     return $stmt->execute();
 }
 
-function get_story_image($title) {
+function get_story_image($title)
+{
     // Palabras clave optimizadas para ilustraciones infantiles
     $keywords = urlencode($title . ' children illustration');
-    
+
     // Usar la API de Unsplash con tu key
     $access_key = 'aLWVSlw4IrYuL_x7Pkr3OodCkNwORHTUmj9-RigOI28';
     $url = "https://api.unsplash.com/search/photos?page=1&query=$keywords&per_page=1&client_id=$access_key";
-    
+
+    $options = [
+        'http' => [
+            'timeout' => 2,
+            'header' => "Accept: application/json\r\n"
+        ]
+    ];
+
+    $context = stream_context_create($options);
+
     try {
-        $context = stream_context_create([
-            'http' => ['timeout' => 2] // Timeout de 2 segundos
-        ]);
-        
-        $response = file_get_contents($url, false, $context);
+        $response = @file_get_contents($url, false, $context);
+        if ($response === FALSE) {
+            throw new Exception('Error en la API');
+        }
+
         $data = json_decode($response, true);
-        
+
         if (!empty($data['results'][0]['urls']['regular'])) {
             return $data['results'][0]['urls']['regular'];
         }
     } catch (Exception $e) {
-        // Fallback silencioso
+        error_log("Error en Unsplash API: " . $e->getMessage());
     }
-    
-    // Fallback a servicio público
+
     return "https://source.unsplash.com/featured/800x600/?$keywords";
 }
 
-function get_word_image($word) {
-    // Palabras clave optimizadas para niños
+function get_word_image($word)
+{
+    // Intentar obtener imagen de Unsplash
     $keywords = urlencode($word . ' children');
-    
-    // Usar API para palabras si es necesario
     $access_key = 'aLWVSlw4IrYuL_x7Pkr3OodCkNwORHTUmj9-RigOI28';
     $url = "https://api.unsplash.com/search/photos?page=1&query=$keywords&per_page=1&client_id=$access_key";
-    
+
+    $options = [
+        'http' => [
+            'timeout' => 1,
+            'header' => "Accept: application/json\r\n"
+        ]
+    ];
+
+    $context = stream_context_create($options);
+
     try {
-        $context = stream_context_create([
-            'http' => ['timeout' => 1] // Timeout más corto
-        ]);
-        
-        $response = file_get_contents($url, false, $context);
-        $data = json_decode($response, true);
-        
-        if (!empty($data['results'][0]['urls']['thumb'])) {
-            return $data['results'][0]['urls']['thumb'];
+        $response = @file_get_contents($url, false, $context);
+        if ($response !== false) {
+            $data = json_decode($response, true);
+            if (!empty($data['results'][0]['urls']['regular'])) {
+                return $data['results'][0]['urls']['regular'];
+            }
         }
     } catch (Exception $e) {
-        // Fallback silencioso
+        error_log("Unsplash API error: " . $e->getMessage());
     }
-    
-    // Fallback a servicio público
-    return "https://source.unsplash.com/featured/200x200/?$keywords";
+
+    // Fallback: Imagen genérica desde el servicio público
+    return "https://source.unsplash.com/featured/300x300/?$keywords,child,illustration";
 }
 
 // Función para verificar soporte TTS (versión PHP)
-function tts_supported() {
+function tts_supported()
+{
     // En PHP no podemos verificar directamente el soporte del navegador
     // Asumimos soporte y manejamos la compatibilidad en el cliente
     return true;
 }
 
 // Función para obtener idioma del usuario
-function get_user_language() {
+function get_user_language()
+{
     $lang = 'es-ES'; // Default
-    
+
     if (isset($_SESSION['language'])) {
         return $_SESSION['language'];
     }
-    
+
     if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
         $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 5);
     }
-    
+
     return $lang;
 }
 
-function get_word_painting_data($level = 1) {
+function get_word_painting_data($level = 1)
+{
     global $db;
-    
+
     $difficulty_map = [
         1 => 'easy',
         2 => 'medium',
         3 => 'hard'
     ];
     $difficulty = $difficulty_map[$level] ?? 'easy';
-    
+
     $sql = "SELECT w.id, w.word, w.audio_path, 
                    wp.syllables, wp.syllable_colors
             FROM words w
             JOIN word_painting_data wp ON w.id = wp.word_id
             WHERE wp.difficulty = ? 
             ORDER BY RAND() LIMIT 1";
-    
+
     $stmt = $db->prepare($sql);
     $stmt->bind_param("s", $difficulty);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($result->num_rows === 0) {
         // Reintentar con dificultad fácil si no hay resultados
         $stmt->bind_param("s", 'easy');
         $stmt->execute();
         $result = $stmt->get_result();
     }
-    
+
     if ($result->num_rows === 0) {
         return null;
     }
-    
+
     $row = $result->fetch_assoc();
     $syllables = explode('-', $row['syllables']);
     $syllable_colors = json_decode($row['syllable_colors'], true);
-    
+
     return [
         'word' => $row['word'],
         'syllables' => $syllables,

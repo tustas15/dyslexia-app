@@ -12,49 +12,86 @@ if (!is_logged_in()) {
 }
 
 $level = $_GET['level'] ?? 1;
-
-// Convertir nivel numérico a dificultad textual
-$difficulty_map = [
-    1 => 'easy',
-    2 => 'medium',
-    3 => 'hard'
-];
+$difficulty_map = [1 => 'easy', 2 => 'medium', 3 => 'hard'];
 $difficulty = $difficulty_map[$level] ?? 'easy';
 
-// Obtener una palabra con un error común
-$sql = "SELECT w.id, w.word AS correct_word, w.audio_path, w.image_path, 
-               go.option_text AS incorrect_word 
-        FROM words w
-        JOIN game_options go ON w.id = go.word_id 
-        WHERE go.game_type = 'word-robot' 
-          AND w.difficulty = ?
-        ORDER BY RAND() LIMIT 1";
+// Obtener palabras para el nivel actual usando la nueva tabla
+$sql = "SELECT wrd.id, wrd.correct_word, wrd.incorrect_word, 
+               w.audio_path, w.image_path 
+        FROM word_robot_data wrd
+        JOIN words w ON wrd.word_id = w.id
+        WHERE wrd.difficulty = ?
+        ORDER BY RAND() LIMIT 3";
 
 $stmt = $db->prepare($sql);
-$stmt->bind_param("s", $difficulty);
+if (!$stmt) {
+    die("Error en la preparación: " . $db->error);
+}
+
+// Variable temporal para bind_param
+$temp_difficulty = $difficulty;
+$stmt->bind_param("s", $temp_difficulty);
 $stmt->execute();
 $result = $stmt->get_result();
 
-if ($result->num_rows === 0) {
-    // Intentar con dificultad fácil como respaldo
+$words = [];
+while ($row = $result->fetch_assoc()) {
+    $words[] = [
+        'correct_word' => $row['correct_word'],
+        'incorrect_word' => $row['incorrect_word'],
+        'audio' => get_audio('robot', $row['audio_path']),
+        'image' => get_word_image($row['correct_word']) // Usar API para imagen
+    ];
+}
+
+if (empty($words)) {
+    // Fallback a dificultad fácil
     $stmt->bind_param("s", 'easy');
     $stmt->execute();
     $result = $stmt->get_result();
-    
-    if ($result->num_rows === 0) {
+
+    while ($row = $result->fetch_assoc()) {
+        $words[] = [
+            'correct_word' => $row['correct_word'],
+            'incorrect_word' => $row['incorrect_word'],
+            'audio' => get_audio('robot', $row['audio_path']),
+            'image' => get_word_image($row['correct_word']) // Usar API para imagen
+        ];
+    }
+
+    if (empty($words)) {
         die("No hay datos disponibles para este nivel.");
     }
 }
 
-$row = $result->fetch_assoc();
+// Inicializar sesión de progreso si no existe
+if (!isset($_SESSION['robot_progress'])) {
+    $_SESSION['robot_progress'] = [
+        'level' => $level,
+        'current_word' => 0,
+        'score' => 0,
+        'words' => $words
+    ];
+}
 
-$game_data = [
-    'correct_word' => $row['correct_word'],
-    'incorrect_word' => $row['incorrect_word'],
-    'audio' => get_audio('robot', $row['audio_path']),
-    'image' => get_image('games', $row['image_path']),
-    'level' => $level
-];
+// Manejar reinicio de progreso si cambia el nivel
+if ($_SESSION['robot_progress']['level'] != $level) {
+    $_SESSION['robot_progress'] = [
+        'level' => $level,
+        'current_word' => 0,
+        'score' => 0,
+        'words' => $words
+    ];
+}
+
+$current_index = $_SESSION['robot_progress']['current_word'];
+$current_word = $_SESSION['robot_progress']['words'][$current_index] ?? null;
+
+// Redirigir si se completó el nivel
+if ($current_index >= count($words)) {
+    header("Location: level_complete.php?level=$level");
+    exit;
+}
 
 $content = ''; // Se generará en view.php
 include 'view.php';
