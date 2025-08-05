@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 29-07-2025 a las 19:11:05
+-- Tiempo de generación: 05-08-2025 a las 23:56:35
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -243,7 +243,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `age`, `level`, `created_at`) VALUES
-(1, 'tustas', '$2y$10$eXdPYkTDV9.cZZu1XEApLOj2UHNFKAD4ck3tqXxOsa/3YCXMNxGvK', 8, 1, '2025-07-20 21:54:38');
+(1, 'tustas', '$2y$10$eXdPYkTDV9.cZZu1XEApLOj2UHNFKAD4ck3tqXxOsa/3YCXMNxGvK', 8, 3, '2025-07-20 21:54:38'),
+(2, 'Dafnne', '$2y$10$lW.9hVYB.a8aK0Lv0WdGmuAW8E3VPll4/ERDSVYDVEFaE5GGvrwMG', 12, 1, '2025-07-29 01:02:43'),
+(3, 'Luna', '$2y$10$C.i26cFhuD7auIlSiLCIv.xQztI5fbkareaWcCGH6K0DFCyMdriBa', 7, 1, '2025-07-29 03:29:43');
 
 -- --------------------------------------------------------
 
@@ -262,26 +264,6 @@ CREATE TABLE `user_progress` (
   `is_restart` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `user_progress`
---
-
-INSERT INTO `user_progress` (`id`, `user_id`, `game_type`, `level`, `score`, `details`, `timestamp`, `is_restart`) VALUES
-(71, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"flor\",\"selected\":\"\\n                flor            \",\"timestamp\":\"2025-07-28 20:11:53\"}', '2025-07-28 18:11:53', 0),
-(72, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"sol\",\"selected\":\"\\n                sol            \",\"timestamp\":\"2025-07-28 20:11:56\"}', '2025-07-28 18:11:56', 0),
-(73, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"casa\",\"selected\":\"\\n                casa            \",\"timestamp\":\"2025-07-28 20:11:59\"}', '2025-07-28 18:11:59', 0),
-(74, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"sol\",\"selected\":\"\\n                sol            \",\"timestamp\":\"2025-07-28 20:12:01\"}', '2025-07-28 18:12:01', 0),
-(75, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"zapato\",\"selected\":\"\\n                zapato            \",\"timestamp\":\"2025-07-28 20:12:03\"}', '2025-07-28 18:12:03', 0),
-(76, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"flor\",\"selected\":\"\\n                flor            \",\"timestamp\":\"2025-07-28 20:12:05\"}', '2025-07-28 18:12:05', 0),
-(77, 1, 'auditory-codes', NULL, 0, '{\"level\":1,\"correct\":false,\"word\":\"sol\",\"selected\":\"\\n                sal            \",\"timestamp\":\"2025-07-28 20:12:07\"}', '2025-07-28 18:12:07', 0),
-(78, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"sol\",\"selected\":\"\\n                sol            \",\"timestamp\":\"2025-07-28 20:12:09\"}', '2025-07-28 18:12:09', 0),
-(79, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"zapato\",\"selected\":\"\\n                zapato            \",\"timestamp\":\"2025-07-28 20:12:11\"}', '2025-07-28 18:12:11', 0),
-(80, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"flor\",\"selected\":\"\\n                flor            \",\"timestamp\":\"2025-07-28 20:12:13\"}', '2025-07-28 18:12:13', 0),
-(81, 1, 'auditory-codes', NULL, 10, '{\"level\":1,\"correct\":true,\"word\":\"flor\",\"selected\":\"\\n                flor            \",\"timestamp\":\"2025-07-28 20:12:15\"}', '2025-07-28 18:12:15', 0),
-(82, 1, 'letter-detective', NULL, 5, '{\"level\":1,\"score\":5,\"correct_answers\":1,\"total_pairs\":6,\"lives_remaining\":0,\"timestamp\":\"2025-07-29 00:55:14\"}', '2025-07-28 22:55:14', 0),
-(83, 1, 'letter-detective', NULL, 15, '{\"level\":1,\"score\":15,\"correct_answers\":3,\"total_pairs\":6,\"lives_remaining\":0,\"timestamp\":\"2025-07-29 00:55:27\"}', '2025-07-28 22:55:27', 0),
-(84, 1, 'letter-detective', NULL, 0, '{\"level\":1,\"correct\":null,\"selected\":\"\",\"correct_letter\":\"\",\"timestamp\":\"2025-07-29 01:03:43\"}', '2025-07-28 23:03:43', 0);
-
 -- --------------------------------------------------------
 
 --
@@ -291,7 +273,6 @@ INSERT INTO `user_progress` (`id`, `user_id`, `game_type`, `level`, `score`, `de
 CREATE TABLE `words` (
   `id` int(11) NOT NULL,
   `word` varchar(50) NOT NULL,
-  `syllables` varchar(100) DEFAULT NULL,
   `audio_path` varchar(255) DEFAULT NULL,
   `image_path` varchar(255) DEFAULT NULL,
   `difficulty` enum('easy','medium','hard') DEFAULT 'easy'
@@ -301,25 +282,95 @@ CREATE TABLE `words` (
 -- Volcado de datos para la tabla `words`
 --
 
-INSERT INTO `words` (`id`, `word`, `syllables`, `audio_path`, `image_path`, `difficulty`) VALUES
-(1, 'zapato', 'za-pa-to', 'zapato.mp3', 'zapato.png', 'easy'),
-(2, 'casa', 'ca-sa', 'casa.mp3', 'casa.png', 'easy'),
-(3, 'sol', 'sol', 'sol.mp3', 'sol.png', 'easy'),
-(4, 'flor', 'flor', 'flor.mp3', 'flor.png', 'easy'),
-(5, 'pato', 'pa-to', 'pato.mp3', 'pato.png', 'medium'),
-(6, 'luna', 'lu-na', 'luna.mp3', 'luna.png', 'medium'),
-(7, 'gato', 'ga-to', 'gato.mp3', 'gato.png', 'medium'),
-(8, 'mesa', 'me-sa', 'mesa.mp3', 'mesa.png', 'hard'),
-(9, 'perro', 'pe-rro', 'perro.mp3', 'perro.png', 'hard'),
-(10, 'libro', 'li-bro', 'libro.mp3', 'libro.png', 'hard'),
-(11, 'silla', 'si-lla', 'silla.mp3', 'silla.png', 'medium'),
-(12, 'ventana', 'ven-ta-na', 'ventana.mp3', 'ventana.png', 'medium'),
-(13, 'elefante', 'e-le-fan-te', 'elefante.mp3', 'elefante.png', 'hard'),
-(14, 'computadora', 'com-pu-ta-do-ra', 'computadora.mp3', 'computadora.png', 'hard'),
-(15, 'paraguas', 'pa-ra-guas', 'paraguas.mp3', 'paraguas.png', 'hard'),
-(16, 'astronauta', 'as-tro-nau-ta', NULL, NULL, 'hard'),
-(17, 'biblioteca', 'bi-blio-te-ca', NULL, NULL, 'hard'),
-(18, 'refrigerador', 're-fri-ge-ra-dor', NULL, NULL, 'hard');
+INSERT INTO `words` (`id`, `word`, `audio_path`, `image_path`, `difficulty`) VALUES
+(1, 'zapato', 'zapato.mp3', 'zapato.png', 'easy'),
+(2, 'casa', 'casa.mp3', 'casa.png', 'easy'),
+(3, 'sol', 'sol.mp3', 'sol.png', 'easy'),
+(4, 'flor', 'flor.mp3', 'flor.png', 'easy'),
+(5, 'pato', 'pato.mp3', 'pato.png', 'medium'),
+(6, 'luna', 'luna.mp3', 'luna.png', 'medium'),
+(7, 'gato', 'gato.mp3', 'gato.png', 'medium'),
+(8, 'mesa', 'mesa.mp3', 'mesa.png', 'hard'),
+(9, 'perro', 'perro.mp3', 'perro.png', 'hard'),
+(10, 'libro', 'libro.mp3', 'libro.png', 'hard'),
+(11, 'silla', 'silla.mp3', 'silla.png', 'medium'),
+(12, 'ventana', 'ventana.mp3', 'ventana.png', 'medium'),
+(13, 'elefante', 'elefante.mp3', 'elefante.png', 'hard'),
+(14, 'computadora', 'computadora.mp3', 'computadora.png', 'hard'),
+(15, 'paraguas', 'paraguas.mp3', 'paraguas.png', 'hard'),
+(16, 'astronauta', NULL, NULL, 'hard'),
+(17, 'biblioteca', NULL, NULL, 'hard'),
+(18, 'refrigerador', NULL, NULL, 'hard');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `word_painting_data`
+--
+
+CREATE TABLE `word_painting_data` (
+  `id` int(11) NOT NULL,
+  `word_id` int(11) NOT NULL,
+  `syllables` varchar(100) NOT NULL,
+  `syllable_colors` varchar(255) NOT NULL COMMENT 'JSON array de colores para cada sílaba',
+  `difficulty` enum('easy','medium','hard') NOT NULL DEFAULT 'easy'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `word_painting_data`
+--
+
+INSERT INTO `word_painting_data` (`id`, `word_id`, `syllables`, `syllable_colors`, `difficulty`) VALUES
+(1, 1, 'za-pa-to', '[\"#FF6B6B\",\"#4D96FF\",\"#6BC777\"]', 'easy'),
+(2, 2, 'ca-sa', '[\"#FF6B6B\",\"#4D96FF\"]', 'easy'),
+(3, 3, 'sol', '[\"#FF6B6B\"]', 'easy'),
+(4, 4, 'flor', '[\"#FF6B6B\"]', 'easy'),
+(5, 5, 'pa-to', '[\"#FF6B6B\",\"#4D96FF\"]', 'medium'),
+(6, 6, 'lu-na', '[\"#FF6B6B\",\"#4D96FF\"]', 'medium'),
+(7, 7, 'ga-to', '[\"#FF6B6B\",\"#4D96FF\"]', 'medium'),
+(8, 8, 'me-sa', '[\"#FF6B6B\",\"#4D96FF\"]', 'hard'),
+(9, 9, 'pe-rro', '[\"#FF6B6B\",\"#4D96FF\"]', 'hard'),
+(10, 10, 'li-bro', '[\"#FF6B6B\",\"#4D96FF\"]', 'hard');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `word_robot_data`
+--
+
+CREATE TABLE `word_robot_data` (
+  `id` int(11) NOT NULL,
+  `word_id` int(11) NOT NULL,
+  `correct_word` varchar(50) NOT NULL,
+  `incorrect_word` varchar(50) NOT NULL,
+  `difficulty` enum('easy','medium','hard') NOT NULL DEFAULT 'easy'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `word_robot_data`
+--
+
+INSERT INTO `word_robot_data` (`id`, `word_id`, `correct_word`, `incorrect_word`, `difficulty`) VALUES
+(1, 1, 'zapato', 'sapato', 'easy'),
+(2, 1, 'zapato', 'capato', 'easy'),
+(3, 2, 'casa', 'caza', 'easy'),
+(4, 2, 'casa', 'tasa', 'easy'),
+(5, 3, 'sol', 'sal', 'easy'),
+(6, 3, 'sol', 'col', 'easy'),
+(7, 4, 'flor', 'fror', 'easy'),
+(8, 4, 'flor', 'flol', 'easy'),
+(9, 5, 'pato', 'bato', 'medium'),
+(10, 5, 'pato', 'plato', 'medium'),
+(11, 11, 'silla', 'sillón', 'medium'),
+(12, 11, 'silla', 'sillal', 'medium'),
+(13, 12, 'ventana', 'ventanal', 'medium'),
+(14, 12, 'ventana', 'ventanilla', 'medium'),
+(15, 13, 'elefante', 'elegante', 'hard'),
+(16, 13, 'elefante', 'elefantes', 'hard'),
+(17, 16, 'astronauta', 'astronauto', 'hard'),
+(18, 16, 'astronauta', 'astronomía', 'hard'),
+(19, 17, 'biblioteca', 'bibliotecas', 'hard'),
+(20, 17, 'biblioteca', 'bibliografía', 'hard');
 
 --
 -- Índices para tablas volcadas
@@ -372,6 +423,20 @@ ALTER TABLE `words`
   ADD UNIQUE KEY `word_unique` (`word`);
 
 --
+-- Indices de la tabla `word_painting_data`
+--
+ALTER TABLE `word_painting_data`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `word_id` (`word_id`);
+
+--
+-- Indices de la tabla `word_robot_data`
+--
+ALTER TABLE `word_robot_data`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `word_id` (`word_id`);
+
+--
 -- AUTO_INCREMENT de las tablas volcadas
 --
 
@@ -403,19 +468,31 @@ ALTER TABLE `stories`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `user_progress`
 --
 ALTER TABLE `user_progress`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=116;
 
 --
 -- AUTO_INCREMENT de la tabla `words`
 --
 ALTER TABLE `words`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT de la tabla `word_painting_data`
+--
+ALTER TABLE `word_painting_data`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT de la tabla `word_robot_data`
+--
+ALTER TABLE `word_robot_data`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- Restricciones para tablas volcadas
