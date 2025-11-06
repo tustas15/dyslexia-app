@@ -37,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
 
-            // Crear variables para pasar por referencia
             $user_id = $_SESSION['user_id'];
             $game_type = 'syllable-hunt';
 
@@ -47,7 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $stmt->bind_param("isis", $user_id, $game_type, $score, $details);
             $stmt->execute();
 
-            // Redirigir a pantalla de nivel completado
             header('Content-Type: application/json');
             echo json_encode([
                 'completed' => true,
@@ -91,38 +89,38 @@ $difficulty = $difficulty_map[$level] ?? 'easy';
 // Determinar número de sílabas según nivel
 $syllable_count = 2;
 if ($level == 2) $syllable_count = 3;
-if ($level == 3) $syllable_count = 3;  // Cambiado de 4 a 3
+if ($level == 3) $syllable_count = 3;
 
-// Consulta para palabras con el número de sílabas requerido
-$sql = "SELECT w.id, w.word, w.image_path, w.audio_path, wp.syllables 
+// MEJORADO: Consulta más flexible para nivel 2
+$sql = "SELECT w.id, w.word, w.audio_path, wp.syllables 
         FROM words w
         JOIN word_painting_data wp ON w.id = wp.word_id
         WHERE wp.difficulty = ? 
         AND LENGTH(wp.syllables) - LENGTH(REPLACE(wp.syllables, '-', '')) + 1 = ?
         ORDER BY RAND() LIMIT 1";
 
-// Primera consulta con dificultad original
 $stmt1 = $db->prepare($sql);
 $stmt1->bind_param("si", $difficulty, $syllable_count);
 $stmt1->execute();
 $result = $stmt1->get_result();
 
-// Fallback si no hay palabras: buscar en cualquier dificultad
+// MEJORADO: Fallback más robusto para nivel 2
 if ($result->num_rows === 0) {
-    $sql_fallback = "SELECT w.id, w.word, w.image_path, w.audio_path, wp.syllables 
+    // Intentar con cualquier palabra de la dificultad, sin importar número de sílabas
+    $sql_fallback = "SELECT w.id, w.word, w.audio_path, wp.syllables 
                      FROM words w
                      JOIN word_painting_data wp ON w.id = wp.word_id
-                     WHERE LENGTH(wp.syllables) - LENGTH(REPLACE(wp.syllables, '-', '')) + 1 = ?
+                     WHERE wp.difficulty = ?
                      ORDER BY RAND() LIMIT 1";
     
     $stmt_fallback = $db->prepare($sql_fallback);
-    $stmt_fallback->bind_param("i", $syllable_count);
+    $stmt_fallback->bind_param("s", $difficulty);
     $stmt_fallback->execute();
     $result = $stmt_fallback->get_result();
 
     if ($result->num_rows === 0) {
-        // Último recurso: usar cualquier palabra con el número de sílabas
-        $sql_last_chance = "SELECT w.id, w.word, w.image_path, w.audio_path, wp.syllables 
+        // Último recurso: usar cualquier palabra
+        $sql_last_chance = "SELECT w.id, w.word, w.audio_path, wp.syllables 
                             FROM words w
                             JOIN word_painting_data wp ON w.id = wp.word_id
                             ORDER BY RAND() LIMIT 1";
@@ -132,23 +130,41 @@ if ($result->num_rows === 0) {
         $result = $stmt_last->get_result();
         
         if ($result->num_rows === 0) {
-            die("No hay datos disponibles para este nivel.");
+            // Crear palabra de emergencia
+            $emergency_words = [
+                ['word' => 'computadora', 'syllables' => 'com-pu-ta-do-ra'],
+                ['word' => 'elefante', 'syllables' => 'e-le-fan-te'],
+                ['word' => 'ventana', 'syllables' => 'ven-ta-na']
+            ];
+            $random_word = $emergency_words[array_rand($emergency_words)];
+            
+            $row = [
+                'id' => 0,
+                'word' => $random_word['word'],
+                'audio_path' => '',
+                'syllables' => $random_word['syllables']
+            ];
         }
     }
 }
 
-$row = $result->fetch_assoc();
+if (!isset($row)) {
+    $row = $result->fetch_assoc();
+}
 
 // Procesar sílabas
 $syllables = explode('-', $row['syllables']);
 $correct_syllables = $syllables;
 shuffle($syllables);
 
+// MEJORADO: Función más robusta para obtener imágenes
+$image = get_word_image_enhanced($row['word']);
+
 $game_data = [
     'word' => $row['word'],
     'syllables' => $syllables,
     'correct_syllables' => $correct_syllables,
-    'image' => get_image('games', $row['image_path']),
+    'image' => $image,
     'audio' => get_audio('syllables', $row['audio_path']),
     'level' => $level
 ];

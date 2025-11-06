@@ -45,7 +45,6 @@ ob_start();
     <div class="game-content">
         <div class="target-area">
             <img src="<?= $image ?>" alt="<?= htmlspecialchars($word) ?>" class="target-image">
-            <div class="target-word"><?= htmlspecialchars($word) ?></div>
         </div>
 
         <div class="drop-zone">
@@ -125,15 +124,15 @@ ob_start();
     const word = "<?= $word ?>";
     let userOrder = Array(correctSyllables.length).fill(null);
     document.addEventListener('DOMContentLoaded', () => {
-       
-    // Crear elemento de menú faltante
-    if (!document.getElementById('translate-page')) {
-        const translateItem = document.createElement('div');
-        translateItem.id = 'translate-page';
-        translateItem.classList.add('hidden'); // Ocultar si no es necesario
-        document.body.appendChild(translateItem);
-    }
-});
+
+        // Crear elemento de menú faltante
+        if (!document.getElementById('translate-page')) {
+            const translateItem = document.createElement('div');
+            translateItem.id = 'translate-page';
+            translateItem.classList.add('hidden'); // Ocultar si no es necesario
+            document.body.appendChild(translateItem);
+        }
+    });
     // Sonidos de feedback
     const successAudio = new Howl({
         src: ['<?= get_audio('common', 'success.mp3') ?>']
@@ -255,49 +254,51 @@ ob_start();
 
     // Guardar progreso
     function saveProgress(isCorrect) {
-        if (!isCorrect) return;
+    if (!isCorrect) return;
 
-        // Actualizar progreso en sesión
-        fetch('index.php?action=update_progress', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'action=update_progress'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.completed) {
-                    window.location.href = data.redirect;
-                } else {
-                    // Actualizar barra de progreso
-                    const progressBar = document.querySelector('.progress-fill');
-                    const progressPercent = (data.words_completed / 3) * 100;
-                    progressBar.style.width = `${progressPercent}%`;
-
-                    // Actualizar contador
-                    document.querySelector('.progress-info span').textContent =
-                        `Progreso del nivel: ${data.words_completed}/3 palabras`;
-
-                    // Mostrar botón de siguiente palabra
-                    document.getElementById('next-btn').classList.remove('hidden');
-                }
-            });
-
-        // Guardar progreso en la API
-        fetch('/api/save-progress.php', {
+    // Actualizar progreso en sesión
+    fetch('index.php', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: JSON.stringify({
-                game: 'syllable-hunt',
-                level: <?= $level ?>,
-                correct: true,
-                word: word
-            })
+            body: 'action=update_progress'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.completed) {
+                window.location.href = data.redirect;
+            } else {
+                // Actualizar barra de progreso
+                const progressBar = document.querySelector('.progress-fill');
+                const progressPercent = (data.words_completed / 3) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+
+                // Actualizar contador
+                document.querySelector('.progress-info span').textContent =
+                    `Progreso del nivel: ${data.words_completed}/3 palabras`;
+
+                document.getElementById('next-btn').classList.remove('hidden');
+            }
         });
-    }
+
+    // MEJORADO: Ruta corregida para save-progress.php
+    fetch('../../api/save-progress.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            game: 'syllable-hunt',
+            level: <?= $level ?>,
+            correct: true,
+            word: word
+        })
+    }).catch(error => {
+        console.log('Error guardando progreso:', error);
+        // No bloquear la experiencia si falla el guardado
+    });
+}
 </script>
 
 <style>
@@ -318,23 +319,28 @@ ob_start();
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
 
     .target-image {
-        max-width: 150px;
-        max-height: 150px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        margin-bottom: 10px;
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 15px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        border: 4px solid white;
     }
 
-    .target-word {
+
+    /* .target-word {
         font-size: 2rem;
         font-weight: bold;
         color: #43658b;
         text-align: center;
-    }
+    } */
 
     .tts-controls {
         display: flex;

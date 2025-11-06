@@ -44,19 +44,25 @@ try {
             break;
 
         case 'syllable-hunt':
-            $game_data = load_game_data($game_type, $level);
-            if (!$game_data) {
-                throw new Exception('Datos no disponibles para syllable-hunt');
-            }
+    $game_data = load_game_data($game_type, $level);
+    if (!$game_data) {
+        throw new Exception('Datos no disponibles para syllable-hunt');
+    }
 
-            $syllables = explode('-', $game_data['syllables']);
-            shuffle($syllables);
-            $response = [
-                'word' => $game_data['word'],
-                'syllables' => $syllables,
-                'image' => get_image('games', $game_data['image_path'])
-            ];
-            break;
+    $syllables = explode('-', $game_data['syllables']);
+    shuffle($syllables);
+    
+    // Obtener imagen de Unsplash si no hay en la base de datos
+    $image_url = $game_data['image_path'] ? 
+        get_image('games', $game_data['image_path']) : 
+        get_word_image($game_data['word']);
+    
+    $response = [
+        'word' => $game_data['word'],
+        'syllables' => $syllables,
+        'image' => $image_url  // Solo la imagen, sin la palabra
+    ];
+    break;
 
         case 'rhyme-platform':
             // Mapa de dificultad
@@ -189,7 +195,6 @@ try {
                 'word' => $row['word'],
                 'syllables' => $syllables,
                 'syllable_colors' => $syllable_colors
-                // Ya no necesitamos enviar la ruta de audio
             ];
             break;
 

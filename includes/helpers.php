@@ -88,22 +88,98 @@ function get_story_image($title)
     return "https://source.unsplash.com/featured/800x600/?$keywords";
 }
 
-function get_word_image($word)
-{
-    // Intentar obtener imagen de Unsplash
-    $keywords = urlencode($word . ' children');
+function get_word_image($word) {
+    // Limpiar y preparar la palabra para la búsqueda
+    $clean_word = urlencode(trim($word) . ' objeto item');
+    
+    // Usar Unsplash con parámetros para imágenes más específicas
     $access_key = 'aLWVSlw4IrYuL_x7Pkr3OodCkNwORHTUmj9-RigOI28';
-    $url = "https://api.unsplash.com/search/photos?page=1&query=$keywords&per_page=1&client_id=$access_key";
-
+    $url = "https://api.unsplash.com/search/photos?page=1&query=$clean_word&per_page=1&orientation=squarish&client_id=$access_key";
+    
     $options = [
         'http' => [
-            'timeout' => 1,
+            'timeout' => 3,
             'header' => "Accept: application/json\r\n"
         ]
     ];
-
+    
     $context = stream_context_create($options);
+    
+    try {
+        $response = @file_get_contents($url, false, $context);
+        if ($response !== false) {
+            $data = json_decode($response, true);
+            if (!empty($data['results'][0]['urls']['regular'])) {
+                return $data['results'][0]['urls']['regular'];
+            }
+        }
+    } catch (Exception $e) {
+        error_log("Unsplash API error for word '$word': " . $e->getMessage());
+    }
+    
+    // Fallback a source.unsplash.com (más rápido, menos específico)
+    return "https://source.unsplash.com/featured/400x400/?$clean_word";
+}
 
+function get_word_image_enhanced($word) {
+    $clean_word = strtolower(trim($word));
+    
+    // Mapeo más extenso de palabras
+    $word_mappings = [
+        'casa' => 'house',
+        'sol' => 'sun',
+        'flor' => 'flower',
+        'pato' => 'duck',
+        'luna' => 'moon',
+        'gato' => 'cat',
+        'mesa' => 'table',
+        'perro' => 'dog',
+        'libro' => 'book',
+        'silla' => 'chair',
+        'ventana' => 'window',
+        'elefante' => 'elephant',
+        'computadora' => 'computer',
+        'paraguas' => 'umbrella',
+        'astronauta' => 'astronaut',
+        'biblioteca' => 'library',
+        'refrigerador' => 'refrigerator'
+    ];
+    
+    $search_term = $word_mappings[$clean_word] ?? $clean_word;
+    
+    // Intentar múltiples estrategias de búsqueda
+    $search_strategies = [
+        $search_term . ' children illustration',
+        $search_term . ' clipart',
+        $search_term . ' object',
+        $search_term // término simple como último recurso
+    ];
+    
+    foreach ($search_strategies as $strategy) {
+        $keywords = urlencode($strategy);
+        $image_url = try_unsplash_api($keywords);
+        if ($image_url) {
+            return $image_url;
+        }
+    }
+    
+    // Fallback final
+    return "https://source.unsplash.com/featured/400x400/?$search_term,object";
+}
+
+function try_unsplash_api($keywords) {
+    $access_key = 'aLWVSlw4IrYuL_x7Pkr3OodCkNwORHTUmj9-RigOI28';
+    $url = "https://api.unsplash.com/search/photos?page=1&query=$keywords&per_page=1&orientation=squarish&client_id=$access_key";
+    
+    $options = [
+        'http' => [
+            'timeout' => 3,
+            'header' => "Accept: application/json\r\n"
+        ]
+    ];
+    
+    $context = stream_context_create($options);
+    
     try {
         $response = @file_get_contents($url, false, $context);
         if ($response !== false) {
@@ -115,9 +191,8 @@ function get_word_image($word)
     } catch (Exception $e) {
         error_log("Unsplash API error: " . $e->getMessage());
     }
-
-    // Fallback: Imagen genérica desde el servicio público
-    return "https://source.unsplash.com/featured/300x300/?$keywords,child,illustration";
+    
+    return null;
 }
 
 // Función para verificar soporte TTS (versión PHP)
