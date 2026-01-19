@@ -1,4 +1,8 @@
 <?php
+// Include dependencies
+require_once 'logger.php';
+require_once 'cache.php';
+
 function get_asset($type, $path)
 {
     return ASSETS_PATH . "/$type/$path";
@@ -57,8 +61,8 @@ function get_story_image($title)
     // Palabras clave optimizadas para ilustraciones infantiles
     $keywords = urlencode($title . ' children illustration');
 
-    // Usar la API de Unsplash con tu key
-    $access_key = 'aLWVSlw4IrYuL_x7Pkr3OodCkNwORHTUmj9-RigOI28';
+    // Usar la API de Unsplash con tu key desde variables de entorno
+    $access_key = getenv('UNSPLASH_ACCESS_KEY') ?: 'aLWVSlw4IrYuL_x7Pkr3OodCkNwORHTUmj9-RigOI28';
     $url = "https://api.unsplash.com/search/photos?page=1&query=$keywords&per_page=1&client_id=$access_key";
 
     $options = [
@@ -73,27 +77,44 @@ function get_story_image($title)
     try {
         $response = @file_get_contents($url, false, $context);
         if ($response === FALSE) {
-            throw new Exception('Error en la API');
+            throw new Exception('API request failed: Unable to connect to Unsplash API');
         }
 
         $data = json_decode($response, true);
 
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('API response parsing failed: Invalid JSON response');
+        }
+
+        if (isset($data['errors']) && !empty($data['errors'])) {
+            throw new Exception('Unsplash API error: ' . implode(', ', $data['errors']));
+        }
+
         if (!empty($data['results'][0]['urls']['regular'])) {
             return $data['results'][0]['urls']['regular'];
         }
-    } catch (Exception $e) {
-        error_log("Error en Unsplash API: " . $e->getMessage());
-    }
 
-    return "https://source.unsplash.com/featured/800x600/?$keywords";
+        // No results found
+        throw new Exception('No images found for the given search term');
+
+    } catch (Exception $e) {
+        log_error("Unsplash API Error in get_story_image()", [
+            'error' => $e->getMessage(),
+            'title' => $title,
+            'keywords' => $keywords
+        ]);
+
+        // Return fallback image (cached)
+        return get_cached_image("https://source.unsplash.com/featured/800x600/?$keywords", 'fallback_story_' . md5($keywords));
+    }
 }
 
 function get_word_image($word) {
     // Limpiar y preparar la palabra para la búsqueda
     $clean_word = urlencode(trim($word) . ' objeto item');
-    
+
     // Usar Unsplash con parámetros para imágenes más específicas
-    $access_key = 'aLWVSlw4IrYuL_x7Pkr3OodCkNwORHTUmj9-RigOI28';
+    $access_key = getenv('UNSPLASH_ACCESS_KEY') ?: 'aLWVSlw4IrYuL_x7Pkr3OodCkNwORHTUmj9-RigOI28';
     $url = "https://api.unsplash.com/search/photos?page=1&query=$clean_word&per_page=1&orientation=squarish&client_id=$access_key";
     
     $options = [
@@ -107,18 +128,35 @@ function get_word_image($word) {
     
     try {
         $response = @file_get_contents($url, false, $context);
-        if ($response !== false) {
-            $data = json_decode($response, true);
-            if (!empty($data['results'][0]['urls']['regular'])) {
-                return $data['results'][0]['urls']['regular'];
-            }
+        if ($response === FALSE) {
+            throw new Exception('API request failed: Unable to connect to Unsplash API');
         }
+
+        $data = json_decode($response, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('API response parsing failed: Invalid JSON response');
+        }
+
+        if (isset($data['errors']) && !empty($data['errors'])) {
+            throw new Exception('Unsplash API error: ' . implode(', ', $data['errors']));
+        }
+
+        if (!empty($data['results'][0]['urls']['regular'])) {
+            return $data['results'][0]['urls']['regular'];
+        }
+
+        // No results found
+        throw new Exception('No images found for word: ' . $word);
+
     } catch (Exception $e) {
-        error_log("Unsplash API error for word '$word': " . $e->getMessage());
+        log_error("Unsplash API Error in get_word_image()", [
+            'error' => $e->getMessage(),
+            'word' => $word,
+            'clean_word' => $clean_word
+        ]);
+        return get_cached_image("https://source.unsplash.com/featured/400x400/?$clean_word", 'fallback_word_' . md5($clean_word));
     }
-    
-    // Fallback a source.unsplash.com (más rápido, menos específico)
-    return "https://source.unsplash.com/featured/400x400/?$clean_word";
 }
 
 function get_word_image_enhanced($word) {
@@ -163,36 +201,52 @@ function get_word_image_enhanced($word) {
         }
     }
     
-    // Fallback final
-    return "https://source.unsplash.com/featured/400x400/?$search_term,object";
+    // Fallback final (cached)
+    return get_cached_image("https://source.unsplash.com/featured/400x400/?$search_term,object", 'fallback_enhanced_' . md5($search_term));
 }
 
 function try_unsplash_api($keywords) {
-    $access_key = 'aLWVSlw4IrYuL_x7Pkr3OodCkNwORHTUmj9-RigOI28';
+    $access_key = getenv('UNSPLASH_ACCESS_KEY') ?: 'aLWVSlw4IrYuL_x7Pkr3OodCkNwORHTUmj9-RigOI28';
     $url = "https://api.unsplash.com/search/photos?page=1&query=$keywords&per_page=1&orientation=squarish&client_id=$access_key";
-    
+
     $options = [
         'http' => [
             'timeout' => 3,
             'header' => "Accept: application/json\r\n"
         ]
     ];
-    
+
     $context = stream_context_create($options);
-    
+
     try {
         $response = @file_get_contents($url, false, $context);
-        if ($response !== false) {
-            $data = json_decode($response, true);
-            if (!empty($data['results'][0]['urls']['regular'])) {
-                return $data['results'][0]['urls']['regular'];
-            }
+        if ($response === FALSE) {
+            throw new Exception('API request failed: Unable to connect to Unsplash API');
         }
+
+        $data = json_decode($response, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('API response parsing failed: Invalid JSON response');
+        }
+
+        if (isset($data['errors']) && !empty($data['errors'])) {
+            throw new Exception('Unsplash API error: ' . implode(', ', $data['errors']));
+        }
+
+        if (!empty($data['results'][0]['urls']['regular'])) {
+            return $data['results'][0]['urls']['regular'];
+        }
+
+        return null; // No results found, but not an error
+
     } catch (Exception $e) {
-        error_log("Unsplash API error: " . $e->getMessage());
+        log_error("Unsplash API Error in try_unsplash_api()", [
+            'error' => $e->getMessage(),
+            'keywords' => $keywords
+        ]);
+        return null;
     }
-    
-    return null;
 }
 
 // Función para verificar soporte TTS (versión PHP)

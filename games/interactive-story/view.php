@@ -2,22 +2,22 @@
 // view.php
 ob_start();
 ?>
-<div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+<div class="max-w-4xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg transition-colors duration-300">
     <!-- Header con progreso -->
     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
         <div>
-            <h1 class="text-2xl font-bold"><?= htmlspecialchars($game_data['title']) ?></h1>
-            <p class="text-gray-600">Nivel <?= $game_data['level'] ?></p>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100"><?= htmlspecialchars($game_data['title']) ?></h1>
+            <p class="text-gray-600 dark:text-gray-300">Nivel <?= $game_data['level'] ?></p>
         </div>
 
-        <div class="progress-container bg-blue-50 p-3 rounded-lg">
+        <div class="progress-container bg-blue-50 dark:bg-gray-700 p-3 rounded-lg border border-blue-200 dark:border-gray-600">
             <div class="flex justify-between mb-2">
-                <span class="text-blue-700 font-medium">Historias completadas</span>
-                <span class="text-blue-700 font-bold">
+                <span class="text-blue-700 dark:text-blue-300 font-medium">Historias completadas</span>
+                <span class="text-blue-700 dark:text-blue-300 font-bold">
                     <?= $game_data['completed_count'] ?>/3
                 </span>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-3 overflow-hidden">
                 <div class="bg-blue-600 h-3 transition-all duration-500"
                     style="width: <?= ($game_data['completed_count'] / 3) * 100 ?>%">
                 </div>
@@ -26,7 +26,7 @@ ob_start();
     </div>
 
     <!-- Instrucciones -->
-    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+    <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4 mb-6 transition-colors duration-300">
         <div class="flex">
             <div class="flex-shrink-0">
                 <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -34,7 +34,7 @@ ob_start();
                 </svg>
             </div>
             <div class="ml-3">
-                <p class="text-sm text-yellow-700">
+                <p class="text-sm text-yellow-700 dark:text-yellow-300">
                     <strong>Instrucciones:</strong>
                     <span id="instructions-text">Arrastra las palabras desde el área inferior hasta los espacios en blanco en la historia.</span>
                 </p>
@@ -44,7 +44,7 @@ ob_start();
 
     <!-- Imagen de la historia -->
     <?php if (!empty($game_data['image'])): ?>
-        <div class="mb-6 rounded-lg overflow-hidden shadow-md max-w-md mx-auto">
+        <div class="mb-6 rounded-lg overflow-hidden shadow-md dark:shadow-lg max-w-md mx-auto">
             <img src="<?= htmlspecialchars($game_data['image']) ?>"
                 alt="Ilustración: <?= htmlspecialchars($game_data['title']) ?>"
                 class="w-full h-auto object-cover"
@@ -54,7 +54,7 @@ ob_start();
     <?php endif; ?>
 
     <!-- Texto de la historia con espacios en blanco como drop targets -->
-    <div class="border-2 border-blue-400 rounded-lg p-6 mb-6 text-lg leading-relaxed min-h-[200px] bg-white" id="story-text">
+    <div class="border-2 border-blue-400 dark:border-blue-600 rounded-lg p-6 mb-6 text-lg leading-relaxed min-h-[200px] bg-white dark:bg-gray-700 transition-colors duration-300" id="story-text">
         <?php
         $template = $game_data['template'];
         $parts = preg_split('/(\{[^}]+\})/', $template, -1, PREG_SPLIT_DELIM_CAPTURE);
@@ -73,8 +73,8 @@ ob_start();
     </div>
 
     <!-- Palabras disponibles -->
-    <div class="bg-blue-100 rounded-lg p-5 mb-6">
-        <h3 class="text-xl font-bold text-center mb-4">Palabras Disponibles</h3>
+    <div class="bg-blue-100 dark:bg-gray-700 rounded-lg p-5 mb-6 border border-blue-200 dark:border-gray-600 transition-colors duration-300">
+        <h3 class="text-xl font-bold text-center mb-4 text-gray-800 dark:text-gray-100">Palabras Disponibles</h3>
         <div class="flex flex-wrap gap-4 justify-center" id="words-container">
             <?php
             // Recolectar todas las palabras
@@ -109,7 +109,7 @@ ob_start();
 
             foreach ($allWords as $word):
             ?>
-                <div class="draggable-word bg-white border-2 border-blue-400 rounded-lg p-3 w-36 text-center cursor-move shadow hover:-translate-y-1 transform transition"
+                <div class="draggable-word bg-white dark:bg-gray-800 border-2 border-blue-400 dark:border-blue-600 rounded-lg p-3 w-36 text-center cursor-move shadow hover:-translate-y-1 transform transition-colors duration-300"
                     draggable="true"
                     data-word="<?= htmlspecialchars($word['word']) ?>"
                     data-category="<?= htmlspecialchars($word['category']) ?>"
@@ -121,12 +121,12 @@ ob_start();
                             loading="lazy"
                             onerror="this.onerror=null; this.src='https://via.placeholder.com/200?text=<?= urlencode($word['word']) ?>';">
                     <?php else: ?>
-                        <div class="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center mb-2">
-                            <i class="fas fa-font text-gray-400 text-3xl"></i>
+                        <div class="w-24 h-24 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center mb-2 transition-colors duration-300">
+                            <i class="fas fa-font text-gray-400 dark:text-gray-500 text-3xl"></i>
                         </div>
                     <?php endif; ?>
-                    <div class="font-bold h-10 flex items-center justify-center mb-1"><?= htmlspecialchars($word['word']) ?></div>
-                    <button class="text-red-500 hover:text-red-700 text-lg audio-btn element-audio" data-text="<?= htmlspecialchars($word['word']) ?>">
+                    <div class="font-bold h-10 flex items-center justify-center mb-1 text-gray-800 dark:text-gray-100"><?= htmlspecialchars($word['word']) ?></div>
+                    <button class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-lg audio-btn element-audio transition-colors duration-300" data-text="<?= htmlspecialchars($word['word']) ?>">
                         <i class="fas fa-volume-up"></i>
                     </button>
                 </div>
@@ -145,25 +145,25 @@ ob_start();
     </div>
 
     <!-- Resultado -->
-    <div class="bg-green-100 border-2 border-green-600 rounded-lg p-6 hidden" id="result-container">
-        <h3 class="text-lg font-bold mb-3 text-center">¡Historia Completa!</h3>
-        <div class="bg-white p-4 rounded-md text-lg leading-relaxed mb-4" id="final-story"></div>
+    <div class="bg-green-100 dark:bg-green-900/20 border-2 border-green-600 dark:border-green-500 rounded-lg p-6 hidden transition-colors duration-300" id="result-container">
+        <h3 class="text-lg font-bold mb-3 text-center text-green-800 dark:text-green-200">¡Historia Completa!</h3>
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-md text-lg leading-relaxed mb-4 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-600 transition-colors duration-300" id="final-story"></div>
 
         <div class="voice-selector mb-4">
-            <span class="voice-label font-medium text-gray-700 mr-2">Voz:</span>
-            <select id="voice-select" class="voice-select border border-gray-300 rounded px-3 py-2">
+            <span class="voice-label font-medium text-gray-700 dark:text-gray-300 mr-2">Voz:</span>
+            <select id="voice-select" class="voice-select border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-300">
                 <option value="">Cargando voces...</option>
             </select>
         </div>
 
         <div class="flex justify-center gap-4">
-            <button id="read-story" class="bg-blue-500 hover:bg-blue-700 text-white px-6 py-2 rounded-full flex items-center gap-2">
+            <button id="read-story" class="bg-blue-500 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-6 py-2 rounded-full flex items-center gap-2 transition-colors duration-300">
                 <i class="fas fa-volume-up"></i> Leer Historia
             </button>
-            <button id="pause-story" class="bg-yellow-500 hover:bg-yellow-700 text-white px-6 py-2 rounded-full flex items-center gap-2 hidden">
+            <button id="pause-story" class="bg-yellow-500 hover:bg-yellow-700 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white px-6 py-2 rounded-full flex items-center gap-2 hidden transition-colors duration-300">
                 <i class="fas fa-pause"></i> Pausar
             </button>
-            <button id="new-story" class="bg-green-500 hover:bg-green-700 text-white px-6 py-2 rounded-full flex items-center gap-2">
+            <button id="new-story" class="bg-green-500 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white px-6 py-2 rounded-full flex items-center gap-2 transition-colors duration-300">
                 <i class="fas fa-plus"></i> Nueva Historia
             </button>
         </div>

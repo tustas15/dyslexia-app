@@ -1,55 +1,91 @@
-<?php ob_start(); ?>
+<?php
+$page_title = "Rompecódigos Auditivos - Nivel {$game_data['level']}";
+ob_start();
+?>
 
-<div class="max-w-3xl mx-auto px-4 py-10">
-    <div class="game-header flex flex-wrap justify-between items-center mb-6 gap-4">
-        <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-blue-700">Rompecódigos Auditivos</h1>
-            <p class="text-gray-600">Nivel <?= $game_data['level'] ?></p>
-        </div>
-
-        <div class="progress-container bg-blue-50 p-3 rounded-lg">
-            <div class="flex justify-between mb-2">
-                <span class="text-blue-700 font-medium">Progreso</span>
-                <span class="text-blue-700 font-bold">
-                    <?= $game_data['words_completed'] ?>/<?= $game_data['words_per_level'] ?>
-                </span>
+<div class="max-w-4xl mx-auto">
+    <!-- Game Header -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+        <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
+            <div class="text-center lg:text-left">
+                <h1 class="text-3xl lg:text-4xl font-bold text-blue-700 mb-2">
+                    <i class="fas fa-volume-up mr-3 text-purple-600"></i>
+                    Rompecódigos Auditivos
+                </h1>
+                <p class="text-lg text-gray-600">Nivel <?= $game_data['level'] ?></p>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                <div class="bg-blue-600 h-3 transition-all duration-500"
-                    style="width: <?= min(100, ($game_data['words_completed'] / $game_data['words_per_level']) * 100) ?>%">
+
+            <!-- Progress Section -->
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border border-blue-200 min-w-[250px]">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-blue-700 font-semibold text-sm">Progreso del Nivel</span>
+                    <span class="text-blue-700 font-bold text-lg">
+                        <?= $game_data['words_completed'] ?>/<?= $game_data['words_per_level'] ?>
+                    </span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-600 h-4 rounded-full transition-all duration-700 ease-out"
+                         style="width: <?= min(100, ($game_data['words_completed'] / $game_data['words_per_level']) * 100) ?>%">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Botón de audio -->
-    <div class="flex justify-center mb-8">
-        <button id="play-btn" class="audio-btn bg-purple-500 text-white text-lg sm:text-xl px-6 py-3 rounded-lg shadow hover:bg-purple-600 transition w-full max-w-xs sm:max-w-none">
-            <i class="fas fa-volume-up mr-2"></i> Escuchar palabra
-        </button>
+    <!-- Instructions Card -->
+    <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 mb-8 border border-purple-200">
+        <div class="text-center">
+            <h2 class="text-xl font-semibold text-purple-800 mb-3">
+                <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                ¿Cómo jugar?
+            </h2>
+            <p class="text-gray-700 text-lg mb-4">Escucha la palabra y selecciona la opción correcta de las que aparecen abajo.</p>
+            <div class="flex justify-center gap-4 text-sm text-gray-600">
+                <span class="flex items-center gap-2">
+                    <i class="fas fa-volume-up text-purple-600"></i>
+                    Haz clic en el botón de audio
+                </span>
+                <span class="flex items-center gap-2">
+                    <i class="fas fa-mouse-pointer text-blue-600"></i>
+                    Selecciona la palabra correcta
+                </span>
+            </div>
+        </div>
     </div>
 
-    <!-- Opciones -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+    <!-- Audio Control -->
+    <div class="text-center mb-8">
+        <button id="play-btn" class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-xl font-bold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <i class="fas fa-volume-up mr-3"></i>
+            <span id="play-text">Escuchar palabra</span>
+        </button>
+        <p class="text-sm text-gray-500 mt-2">Haz clic para escuchar la pronunciación</p>
+    </div>
+
+    <!-- Answer Options -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <?php foreach ($game_data['options'] as $index => $opt): ?>
-            <button class="option w-full py-4 px-6 border-2 border-blue-400 rounded-xl text-base sm:text-lg font-semibold bg-white hover:bg-blue-50 transition max-w-full"
+            <button class="option group relative w-full py-6 px-8 border-3 border-blue-300 rounded-2xl text-xl font-bold bg-white hover:bg-blue-50 hover:border-blue-500 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2 focus:outline-none focus:ring-4 focus:ring-blue-300"
                 data-correct="<?= $opt['correct'] ? '1' : '0' ?>"
                 data-index="<?= $index ?>"
                 onclick="checkAnswer(this)">
-                <?= htmlspecialchars($opt['text']) ?>
+                <span class="relative z-10"><?= htmlspecialchars($opt['text']) ?></span>
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
             </button>
         <?php endforeach; ?>
     </div>
 
-    <!-- Feedback -->
-    <div class="feedback text-center hidden">
-        <div class="feedback-content mb-4">
-            <span class="result-icon flex items-center justify-center w-16 h-16 rounded-full text-3xl mx-auto mb-3"></span>
-            <p class="message text-lg font-medium text-gray-700"></p>
+    <!-- Feedback Modal -->
+    <div id="feedback-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center shadow-2xl">
+            <div id="result-icon" class="text-6xl mb-6"></div>
+            <h3 id="result-title" class="text-2xl font-bold mb-4"></h3>
+            <p id="message" class="text-lg text-gray-700 mb-6"></p>
+            <button id="next-btn" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                <i class="fas fa-arrow-right mr-2"></i>
+                Continuar
+            </button>
         </div>
-        <button class="next-btn bg-green-500 text-white text-lg px-6 py-3 rounded-lg shadow hover:bg-green-600 transition w-full max-w-xs sm:max-w-none">
-            Siguiente palabra
-        </button>
     </div>
 </div>
 <?php
@@ -70,9 +106,10 @@ include '../../includes/game_layout.php';
             this.isSupported = 'speechSynthesis' in window;
 
             if (!this.isSupported) {
-                document.getElementById('play-btn').innerHTML =
-                    '<i class="fas fa-exclamation-triangle mr-2"></i> Audio no disponible';
-                document.getElementById('play-btn').classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+                const playText = document.getElementById('play-text');
+                playText.textContent = 'Audio no disponible';
+                document.getElementById('play-btn').classList.remove('from-purple-500', 'to-purple-600', 'hover:from-purple-600', 'hover:to-purple-700');
+                document.getElementById('play-btn').classList.add('from-yellow-500', 'to-yellow-600', 'hover:from-yellow-600', 'hover:to-yellow-700');
                 document.getElementById('play-btn').disabled = true;
                 return;
             }
@@ -124,23 +161,23 @@ include '../../includes/game_layout.php';
 
             // Eventos para manejar estado
             this.utterance.onstart = () => {
-                document.getElementById('play-btn').innerHTML =
-                    '<i class="fas fa-volume-up mr-2"></i> Reproduciendo...';
-                document.getElementById('play-btn').classList.add('bg-purple-600');
+                const playText = document.getElementById('play-text');
+                playText.textContent = 'Reproduciendo...';
+                document.getElementById('play-btn').classList.add('from-purple-700', 'to-purple-800');
             };
 
             this.utterance.onend = () => {
-                document.getElementById('play-btn').innerHTML =
-                    '<i class="fas fa-volume-up mr-2"></i> Escuchar de nuevo';
-                document.getElementById('play-btn').classList.remove('bg-purple-600');
+                const playText = document.getElementById('play-text');
+                playText.textContent = 'Escuchar de nuevo';
+                document.getElementById('play-btn').classList.remove('from-purple-700', 'to-purple-800');
             };
 
             this.utterance.onerror = (event) => {
                 console.error('Error en TTS:', event.error);
-                document.getElementById('play-btn').innerHTML =
-                    '<i class="fas fa-exclamation-triangle mr-2"></i> Error de audio';
-                document.getElementById('play-btn').classList.remove('bg-purple-600');
-                document.getElementById('play-btn').classList.add('bg-yellow-500');
+                const playText = document.getElementById('play-text');
+                playText.textContent = 'Error de audio';
+                document.getElementById('play-btn').classList.remove('from-purple-700', 'to-purple-800');
+                document.getElementById('play-btn').classList.add('from-yellow-500', 'to-yellow-600');
             };
 
             // Iniciar síntesis de voz
@@ -163,7 +200,7 @@ include '../../includes/game_layout.php';
 
         // Reproducir automáticamente la primera vez
         if (TTS.isSupported) {
-            setTimeout(() => TTS.speak('<?= $game_data['word'] ?>'), 500);
+            setTimeout(() => TTS.speak('<?= $game_data['word'] ?>'), 1000);
         }
     });
 
@@ -171,30 +208,45 @@ include '../../includes/game_layout.php';
     function checkAnswer(btn) {
         const isCorrect = btn.dataset.correct === "1";
 
-        btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+        // Visual feedback for selected answer
+        if (isCorrect) {
+            btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+        } else {
+            btn.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+        }
 
+        // Disable all options and highlight correct answer
         document.querySelectorAll('.option').forEach(optionBtn => {
             optionBtn.disabled = true;
             if (optionBtn.dataset.correct === "1") {
-                optionBtn.classList.add('correct-answer');
+                optionBtn.classList.add('bg-green-200', 'border-green-600', 'text-green-900', 'ring-4', 'ring-green-300');
             }
         });
 
-        const resultIcon = document.querySelector('.result-icon');
-        const message = document.querySelector('.message');
-        const feedback = document.querySelector('.feedback');
-        const nextBtn = document.querySelector('.next-btn');
+        // Show feedback modal
+        const modal = document.getElementById('feedback-modal');
+        const resultIcon = document.getElementById('result-icon');
+        const resultTitle = document.getElementById('result-title');
+        const message = document.getElementById('message');
+        const nextBtn = document.getElementById('next-btn');
 
-        resultIcon.className = 'result-icon ' + (isCorrect ? 'correct' : 'incorrect');
-        resultIcon.innerHTML = isCorrect ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
+        modal.classList.remove('hidden');
 
-        message.textContent = isCorrect ?
-            '¡Correcto! La palabra es <?= htmlspecialchars($game_data['word']) ?>' :
-            'Incorrecto. La palabra correcta es "<?= htmlspecialchars($game_data['word']) ?>"';
+        if (isCorrect) {
+            resultIcon.className = 'fas fa-check-circle text-green-500';
+            resultTitle.textContent = '¡Excelente!';
+            resultTitle.className = 'text-2xl font-bold text-green-600 mb-4';
+            message.textContent = 'Has identificado correctamente la palabra auditiva.';
+            nextBtn.innerHTML = '<i class="fas fa-arrow-right mr-2"></i> Siguiente Palabra';
+        } else {
+            resultIcon.className = 'fas fa-times-circle text-red-500';
+            resultTitle.textContent = '¡Inténtalo de nuevo!';
+            resultTitle.className = 'text-2xl font-bold text-red-600 mb-4';
+            message.textContent = `La palabra correcta era "${<?= json_encode($game_data['word']) ?>}". ¡No te preocupes, sigue practicando!`;
+            nextBtn.innerHTML = '<i class="fas fa-redo mr-2"></i> Reintentar';
+        }
 
-        feedback.classList.remove('hidden');
-        nextBtn.classList.remove('hidden');
-
+        // Save progress
         fetch('../../api/save-progress.php', {
             method: 'POST',
             headers: {
@@ -205,27 +257,31 @@ include '../../includes/game_layout.php';
                 correct: isCorrect,
                 level: <?= $game_data['level'] ?>,
                 word: '<?= $game_data['word'] ?>',
-                selected: btn.textContent
+                selected: btn.textContent.trim()
             })
-        });
+        }).catch(error => console.error('Error saving progress:', error));
     }
 
-    // Manejar siguiente palabra o reintento
-    document.querySelector('.next-btn').addEventListener('click', () => {
-        const isCorrect = document.querySelector('.result-icon').classList.contains('correct');
+    // Handle next button or retry
+    document.getElementById('next-btn').addEventListener('click', () => {
+        const modal = document.getElementById('feedback-modal');
+        const isCorrect = document.getElementById('result-icon').classList.contains('fa-check-circle');
+
+        modal.classList.add('hidden');
+        TTS.stop();
 
         if (isCorrect) {
-            // Nueva palabra
-            TTS.stop();
+            // Load next word
             location.reload();
         } else {
-            // Reintentar la misma palabra
+            // Reset for retry
             document.querySelectorAll('.option').forEach(optionBtn => {
                 optionBtn.disabled = false;
-                optionBtn.classList.remove('correct', 'incorrect', 'correct-answer');
+                optionBtn.classList.remove('bg-green-100', 'border-green-500', 'text-green-800',
+                                         'bg-red-100', 'border-red-500', 'text-red-800',
+                                         'bg-green-200', 'border-green-600', 'text-green-900', 'ring-4', 'ring-green-300');
             });
-            document.querySelector('.feedback').classList.add('hidden');
-            TTS.speak('<?= $game_data['word'] ?>'); // Reproducir el audio nuevamente
+            TTS.speak('<?= $game_data['word'] ?>');
         }
     });
 
@@ -236,96 +292,24 @@ include '../../includes/game_layout.php';
 </script>
 
 <style>
-    /* Estilos específicos para TTS */
-    .audio-btn.bg-purple-500 {
-        background-color: #9f7aea;
-    }
-
-    .audio-btn.bg-purple-500:hover {
-        background-color: #805ad5;
-    }
-
-    .audio-btn.bg-purple-600 {
-        background-color: #805ad5;
-    }
-
-    .audio-btn.bg-yellow-500 {
-        background-color: #ecc94b;
-    }
-
-    .progress-container {
-        min-width: 200px;
-    }
-
+    /* Typography for dyslexia-friendly fonts */
     .option {
-        font-family: 'OpenDyslexic', sans-serif;
-        cursor: pointer;
-        transition: all 0.3s;
+        font-family: 'OpenDyslexic', 'Comic Sans MS', cursive, sans-serif;
     }
 
-    .option:hover {
-        background-color: #f0f9ff;
-        transform: translateY(-3px);
+    /* Smooth transitions for better UX */
+    .option {
+        transition: all 0.3s ease;
     }
 
-    .option.correct {
-        background-color: #d4edda;
-        border-color: #28a745;
+    /* Custom focus styles for accessibility */
+    .option:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
     }
 
-    .option.incorrect {
-        background-color: #f8d7da;
-        border-color: #dc3545;
-    }
-
-    .option.correct-answer {
-        background-color: #d4edda;
-        border-color: #28a745;
-        animation: pulse 1s infinite;
-    }
-
-    @keyframes pulse {
-        0% {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.05);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-    }
-
-    .audio-btn {
-        background-color: #ed6663;
-    }
-
-    .feedback {
-        margin-top: 25px;
-        padding: 20px;
-        border-radius: 15px;
-        text-align: center;
-    }
-
-    .result-icon {
-        display: inline-block;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        font-size: 2rem;
-        line-height: 60px;
-        margin-bottom: 15px;
-    }
-
-    .result-icon.correct {
-        background-color: #d4edda;
-        color: #28a745;
-    }
-
-    .result-icon.incorrect {
-        background-color: #f8d7da;
-        color: #dc3545;
+    /* Modal backdrop blur effect */
+    #feedback-modal {
+        backdrop-filter: blur(4px);
     }
 </style>

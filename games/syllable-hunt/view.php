@@ -17,68 +17,115 @@ ob_start();
 <!-- Cargar Howler.js para audio -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
 
-<div class="game-container syllables">
-    <!-- Cabecera con nivel y controles TTS -->
-    <div class="game-header">
-        <h1>Caza Sílabas <small>Nivel <?= $level ?></small></h1>
-        <div class="tts-controls">
-            <button class="audio-btn" id="play-word-tts">
-                <i class="fas fa-volume-up"></i> Escuchar palabra
-            </button>
-            <button class="audio-btn" id="play-instructions">
-                <i class="fas fa-info-circle"></i> Instrucciones
-            </button>
+<div class="max-w-4xl mx-auto">
+    <!-- Game Header -->
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-6 mb-8 transition-colors duration-300">
+        <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
+            <div class="text-center lg:text-left">
+                <h1 class="text-4xl lg:text-5xl font-bold text-blue-700 dark:text-blue-400 mb-2">
+                    <i class="fas fa-puzzle-piece mr-3 text-orange-600 dark:text-orange-400"></i>
+                    Caza Sílabas
+                </h1>
+                <p class="text-xl text-gray-600 dark:text-gray-300">Nivel <?= $level ?> - Ordena las sílabas</p>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="bg-gradient-to-r from-orange-50 to-blue-50 dark:from-gray-700 dark:to-gray-600 p-4 rounded-xl border border-orange-200 dark:border-gray-500 min-w-[280px]">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-orange-700 dark:text-orange-300 font-semibold text-sm">Progreso del Nivel</span>
+                    <span class="text-orange-700 dark:text-orange-300 font-bold text-lg">
+                        <?= $words_completed ?>/<?= $total_words ?>
+                    </span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-4 overflow-hidden">
+                    <div class="bg-gradient-to-r from-orange-500 to-blue-500 h-4 rounded-full transition-all duration-700 ease-out"
+                         style="width: <?= $progress_percent ?>%">
+                    </div>
+                </div>
+                <div class="text-center mt-2">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Palabras completadas</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Barra de progreso del nivel -->
-    <div class="level-progress">
-        <div class="progress-info">
-            <span>Progreso del nivel: <?= $words_completed ?>/<?= $total_words ?> palabras</span>
-        </div>
-        <div class="progress-bar">
-            <div class="progress-fill" style="width: <?= $progress_percent ?>%"></div>
+    <!-- Instructions Card -->
+    <div class="bg-gradient-to-r from-orange-50 to-blue-50 dark:from-gray-700 dark:to-gray-600 rounded-3xl p-6 mb-8 border border-orange-200 dark:border-gray-500 transition-colors duration-300">
+        <div class="text-center">
+            <h2 class="text-2xl font-semibold text-orange-800 dark:text-orange-300 mb-4">
+                <i class="fas fa-lightbulb text-yellow-500 mr-3"></i>
+                ¿Cómo jugar?
+            </h2>
+            <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">
+                Arrastra las sílabas desde abajo hacia los espacios en blanco para formar la palabra correcta.
+            </p>
+            <div class="flex justify-center gap-4">
+                <button id="play-word-tts" class="bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2">
+                    <i class="fas fa-volume-up"></i> Escuchar palabra
+                </button>
+                <button id="play-instructions" class="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2">
+                    <i class="fas fa-info-circle"></i> Instrucciones
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Contenido principal -->
-    <div class="game-content">
-        <div class="target-area">
-            <img src="<?= $image ?>" alt="<?= htmlspecialchars($word) ?>" class="target-image">
+    <!-- Game Area -->
+    <div class="bg-gradient-to-b from-blue-50 via-white to-orange-50 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600 rounded-3xl p-8 shadow-2xl border border-blue-200 dark:border-gray-500 transition-colors duration-300">
+        <!-- Target Word Display -->
+        <div class="text-center mb-8">
+            <?php if (!empty($image)): ?>
+                <div class="inline-block p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-lg mb-4">
+                    <img src="<?= $image ?>" alt="<?= htmlspecialchars($word) ?>" class="w-32 h-32 object-contain rounded-xl">
+                </div>
+            <?php endif; ?>
+            <h3 class="text-2xl font-bold text-blue-700 dark:text-blue-300 mb-4">Forma la palabra: <span class="text-3xl">"<?= htmlspecialchars($word) ?>"</span></h3>
         </div>
 
-        <div class="drop-zone">
+        <!-- Drop Zone -->
+        <div class="flex justify-center gap-4 mb-8 flex-wrap">
             <?php for ($i = 0; $i < count($correct_syllables); $i++): ?>
-                <div class="slot" data-index="<?= $i ?>"></div>
+                <div class="w-20 h-20 border-3 border-dashed border-blue-400 dark:border-blue-600 rounded-xl flex items-center justify-center text-2xl font-bold bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 hover:shadow-xl"
+                     data-index="<?= $i ?>">
+                </div>
             <?php endfor; ?>
         </div>
 
-        <div class="syllables-container">
+        <!-- Syllables Container -->
+        <div class="flex justify-center gap-4 flex-wrap">
             <?php foreach ($syllables as $syl): ?>
-                <div class="syllable" draggable="true" data-syllable="<?= $syl ?>">
+                <div class="w-16 h-16 bg-gradient-to-r from-orange-400 to-blue-500 dark:from-orange-600 dark:to-blue-600 rounded-xl flex items-center justify-center text-2xl font-bold text-white shadow-lg cursor-move transform hover:scale-110 hover:-translate-y-1 transition-all duration-300 border-2 border-white dark:border-gray-800"
+                     draggable="true"
+                     data-syllable="<?= $syl ?>">
                     <?= $syl ?>
                 </div>
             <?php endforeach; ?>
         </div>
     </div>
 
-    <!-- Controles del juego -->
-    <div class="game-controls">
-        <button class="btn check-btn" id="check-btn">
+    <!-- Game Controls -->
+    <div class="flex justify-center gap-6 mt-8">
+        <button id="check-btn" class="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white font-bold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2">
             <i class="fas fa-check"></i> Comprobar
         </button>
-        <button class="btn reset-btn" id="reset-btn">
+        <button id="reset-btn" class="bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-bold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2">
             <i class="fas fa-redo"></i> Reiniciar
         </button>
-        <button class="btn next-btn hidden" id="next-btn">
+        <button id="next-btn" class="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 hidden">
             <i class="fas fa-arrow-right"></i> Siguiente palabra
         </button>
     </div>
 
-    <!-- Feedback -->
-    <div class="feedback">
-        <div class="result-icon"></div>
-        <p class="message"></p>
+    <!-- Feedback Modal -->
+    <div id="feedback-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-md w-full mx-4 text-center shadow-2xl border border-gray-200 dark:border-gray-600 transition-colors duration-300">
+            <div id="result-icon" class="text-6xl mb-6"></div>
+            <h3 id="result-title" class="text-2xl font-bold mb-4"></h3>
+            <p id="message" class="text-lg text-gray-700 dark:text-gray-300 mb-6"></p>
+            <button id="modal-next-btn" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 dark:from-green-600 dark:to-green-700 dark:hover:from-green-700 dark:hover:to-green-800 text-white font-bold py-3 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+                <i class="fas fa-arrow-right mr-2"></i> Continuar
+            </button>
+        </div>
     </div>
 </div>
 
@@ -158,26 +205,31 @@ ob_start();
     });
 
     // Hacer las sílabas arrastrables
-    document.querySelectorAll('.syllable').forEach(syllable => {
+    document.querySelectorAll('[draggable="true"]').forEach(syllable => {
         syllable.addEventListener('dragstart', (e) => {
             e.dataTransfer.setData('text/plain', syllable.dataset.syllable);
+            syllable.classList.add('opacity-50', 'scale-105');
+        });
+
+        syllable.addEventListener('dragend', () => {
+            syllable.classList.remove('opacity-50', 'scale-105');
         });
     });
 
     // Permitir soltar en los slots
-    document.querySelectorAll('.slot').forEach(slot => {
+    document.querySelectorAll('[data-index]').forEach(slot => {
         slot.addEventListener('dragover', (e) => {
             e.preventDefault();
-            slot.classList.add('drag-over');
+            slot.classList.add('ring-4', 'ring-blue-300', 'scale-105');
         });
 
         slot.addEventListener('dragleave', () => {
-            slot.classList.remove('drag-over');
+            slot.classList.remove('ring-4', 'ring-blue-300', 'scale-105');
         });
 
         slot.addEventListener('drop', (e) => {
             e.preventDefault();
-            slot.classList.remove('drag-over');
+            slot.classList.remove('ring-4', 'ring-blue-300', 'scale-105');
 
             const syllable = e.dataTransfer.getData('text/plain');
             const index = parseInt(slot.dataset.index);
@@ -185,6 +237,7 @@ ob_start();
             // Asignar la sílaba al slot
             slot.textContent = syllable;
             slot.dataset.syllable = syllable;
+            slot.classList.add('text-blue-700', 'dark:text-blue-300', 'font-bold');
             userOrder[index] = syllable;
         });
     });
@@ -193,16 +246,21 @@ ob_start();
     document.getElementById('check-btn').addEventListener('click', () => {
         const isCorrect = userOrder.every((syl, index) => syl === correctSyllables[index]);
 
-        // Feedback visual
-        const resultIcon = document.querySelector('.result-icon');
-        const message = document.querySelector('.message');
-        const nextBtn = document.getElementById('next-btn');
+        // Show feedback modal
+        const modal = document.getElementById('feedback-modal');
+        const resultIcon = document.getElementById('result-icon');
+        const resultTitle = document.getElementById('result-title');
+        const message = document.getElementById('message');
+        const nextBtn = document.getElementById('modal-next-btn');
+
+        modal.classList.remove('hidden');
 
         if (isCorrect) {
-            resultIcon.className = 'result-icon correct';
-            resultIcon.innerHTML = '<i class="fas fa-check"></i>';
-            message.textContent = '¡Correcto! La palabra está bien formada.';
-            nextBtn.classList.remove('hidden');
+            resultIcon.className = 'fas fa-check-circle text-6xl text-green-500';
+            resultTitle.textContent = '¡Excelente!';
+            resultTitle.className = 'text-2xl font-bold text-green-600 mb-4';
+            message.textContent = '¡Perfecto! Has ordenado correctamente las sílabas.';
+            nextBtn.innerHTML = '<i class="fas fa-arrow-right mr-2"></i> Siguiente Palabra';
 
             // Sonido de éxito
             successAudio.play();
@@ -210,18 +268,23 @@ ob_start();
             // Guardar progreso
             saveProgress(true);
         } else {
-            resultIcon.className = 'result-icon incorrect';
-            resultIcon.innerHTML = '<i class="fas fa-times"></i>';
-            message.textContent = '¡Inténtalo de nuevo! El orden no es correcto.';
+            resultIcon.className = 'fas fa-times-circle text-6xl text-red-500';
+            resultTitle.textContent = '¡Inténtalo de nuevo!';
+            resultTitle.className = 'text-2xl font-bold text-red-600 mb-4';
+            message.textContent = 'El orden de las sílabas no es correcto. ¡Sigue intentando!';
+            nextBtn.innerHTML = '<i class="fas fa-redo mr-2"></i> Reintentar';
 
             // Sonido de error
             errorAudio.play();
 
             // Resaltar errores
             userOrder.forEach((syl, index) => {
-                if (syl !== correctSyllables[index]) {
-                    const slot = document.querySelector(`.slot[data-index="${index}"]`);
-                    slot.classList.add('error');
+                if (syl && syl !== correctSyllables[index]) {
+                    const slot = document.querySelector(`[data-index="${index}"]`);
+                    slot.classList.add('bg-red-100', 'dark:bg-red-900/20', 'border-red-500');
+                    setTimeout(() => {
+                        slot.classList.remove('bg-red-100', 'dark:bg-red-900/20', 'border-red-500');
+                    }, 2000);
                 }
             });
         }
@@ -230,14 +293,42 @@ ob_start();
     // Reiniciar
     document.getElementById('reset-btn').addEventListener('click', () => {
         userOrder = Array(correctSyllables.length).fill(null);
-        document.querySelectorAll('.slot').forEach(slot => {
+        document.querySelectorAll('[data-index]').forEach(slot => {
             slot.textContent = '';
             delete slot.dataset.syllable;
-            slot.classList.remove('error');
+            slot.classList.remove('text-blue-700', 'dark:text-blue-300', 'font-bold',
+                                 'bg-red-100', 'dark:bg-red-900/20', 'border-red-500');
         });
-        document.querySelector('.result-icon').className = 'result-icon';
-        document.querySelector('.message').textContent = '';
-        document.getElementById('next-btn').classList.add('hidden');
+
+        // Hide modal
+        document.getElementById('feedback-modal').classList.add('hidden');
+    });
+
+    // Modal next button
+    document.getElementById('modal-next-btn').addEventListener('click', () => {
+        const modal = document.getElementById('feedback-modal');
+        const isCorrect = document.getElementById('result-icon').classList.contains('fa-check-circle');
+
+        modal.classList.add('hidden');
+
+        if (isCorrect) {
+            // Verificar si el nivel está completo
+            const wordsCompleted = <?= $_SESSION['syllable_progress']['words_completed'] ?? 0 ?>;
+
+            if (wordsCompleted >= 2) { // Ya completó 3 con la actual
+                window.location.href = 'level_complete.php?level=' + <?= $level ?>;
+            } else {
+                window.location.reload();
+            }
+        } else {
+            // Reset for retry
+            userOrder = Array(correctSyllables.length).fill(null);
+            document.querySelectorAll('[data-index]').forEach(slot => {
+                slot.textContent = '';
+                delete slot.dataset.syllable;
+                slot.classList.remove('text-blue-700', 'dark:text-blue-300', 'font-bold');
+            });
+        }
     });
 
     // Siguiente palabra
@@ -302,177 +393,40 @@ ob_start();
 </script>
 
 <style>
-    .game-container.syllables {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
+    /* Custom styles for drag and drop effects */
+    [draggable="true"] {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
     }
 
-    .game-header {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-bottom: 20px;
+    /* Modal backdrop blur effect for better UX */
+    #feedback-modal {
+        backdrop-filter: blur(4px);
+        animation: modalFadeIn 0.3s ease-out;
     }
 
-    .target-area {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-bottom: 30px;
-        padding: 20px;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    @keyframes modalFadeIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
     }
 
-    .target-image {
-        max-width: 200px;
-        max-height: 200px;
-        border-radius: 15px;
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-        border: 4px solid white;
+    /* Accessibility improvements */
+    [data-index]:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
     }
 
-
-    /* .target-word {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #43658b;
-        text-align: center;
-    } */
-
-    .tts-controls {
-        display: flex;
-        gap: 10px;
-        margin-top: 10px;
-    }
-
-    .audio-btn {
-        background-color: #4e89ae;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 20px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 0.9rem;
-    }
-
-    .drop-zone {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-    }
-
-    .slot {
-        width: 80px;
-        height: 80px;
-        border: 2px dashed #4e89ae;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        font-weight: bold;
-        background-color: #f0f9ff;
-        transition: all 0.3s;
-    }
-
-    .slot.drag-over {
-        background-color: #e3f2fd;
-        box-shadow: 0 0 8px rgba(78, 137, 174, 0.5);
-    }
-
-    .slot.error {
-        background-color: #f8d7da;
-        border-color: #dc3545;
-    }
-
-    .syllables-container {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-    }
-
-    .syllable {
-        width: 70px;
-        height: 70px;
-        border: 2px solid #4e89ae;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        font-weight: bold;
-        background-color: white;
-        cursor: move;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s;
-    }
-
-    .syllable:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-    }
-
-    .game-controls {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-bottom: 15px;
-    }
-
-    .btn {
-        background-color: #4e89ae;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 30px;
-        font-size: 1rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        transition: all 0.3s;
-    }
-
-    .btn:hover {
-        background-color: #43658b;
-        transform: translateY(-2px);
-    }
-
-    .next-btn {
-        background-color: #4CAF50;
-    }
-
-    .feedback {
-        text-align: center;
-        margin-top: 15px;
-    }
-
-    .result-icon {
-        font-size: 2.5rem;
-        margin-bottom: 10px;
-    }
-
-    .result-icon.correct {
-        color: #4CAF50;
-    }
-
-    .result-icon.incorrect {
-        color: #f44336;
-    }
-
-    .message {
-        font-size: 1.1rem;
-        margin-bottom: 10px;
+    [draggable="true"]:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
     }
 </style>
 <?php

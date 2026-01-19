@@ -1,0 +1,11 @@
+# Deny direct access to cache files
+<Files "*">
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+# Allow access from PHP scripts only
+<Files "*.php">
+    Order Allow,Deny
+    Allow from all
+</Files>

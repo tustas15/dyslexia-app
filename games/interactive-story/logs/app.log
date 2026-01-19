@@ -1,0 +1,19 @@
+[2026-01-19 05:30:11] ERROR: Unsplash API Error in get_story_image() {"error":"No images found for the given search term","title":"Luna, la Llama que No Sab\u00eda Saltar","keywords":"Luna%2C+la+Llama+que+No+Sab%C3%ADa+Saltar+children+illustration"}
+[2026-01-19 05:30:24] ERROR: Unsplash API Error in get_word_image() {"error":"No images found for word: sirena valiente","word":"sirena valiente","clean_word":"sirena+valiente+objeto+item"}
+[2026-01-19 05:31:10] ERROR: Unsplash API Error in get_story_image() {"error":"No images found for the given search term","title":"Luna, la Llama que No Sab\u00eda Saltar","keywords":"Luna%2C+la+Llama+que+No+Sab%C3%ADa+Saltar+children+illustration"}
+[2026-01-19 05:33:45] ERROR: Unsplash API Error in get_word_image() {"error":"No images found for word: ni\u00f1o aventurero","word":"ni\u00f1o aventurero","clean_word":"ni%C3%B1o+aventurero+objeto+item"}
+[2026-01-19 05:33:46] WARNING: Failed to validate image URL for caching {"url":"https:\/\/source.unsplash.com\/featured\/400x400\/?ni%C3%B1o+aventurero+objeto+item"}
+[2026-01-19 05:33:47] ERROR: Unsplash API Error in get_word_image() {"error":"No images found for word: la luna","word":"la luna","clean_word":"la+luna+objeto+item"}
+[2026-01-19 05:33:48] WARNING: Failed to validate image URL for caching {"url":"https:\/\/source.unsplash.com\/featured\/400x400\/?la+luna+objeto+item"}
+[2026-01-19 05:33:54] ERROR: Unsplash API Error in get_word_image() {"error":"No images found for word: criaturas amigables","word":"criaturas amigables","clean_word":"criaturas+amigables+objeto+item"}
+[2026-01-19 05:33:55] WARNING: Failed to validate image URL for caching {"url":"https:\/\/source.unsplash.com\/featured\/400x400\/?criaturas+amigables+objeto+item"}
+[2026-01-19 05:33:58] ERROR: Unsplash API Error in get_word_image() {"error":"No images found for word: el valor de la curiosidad","word":"el valor de la curiosidad","clean_word":"el+valor+de+la+curiosidad+objeto+item"}
+[2026-01-19 05:33:59] WARNING: Failed to validate image URL for caching {"url":"https:\/\/source.unsplash.com\/featured\/400x400\/?el+valor+de+la+curiosidad+objeto+item"}
+[2026-01-19 05:34:11] ERROR: Unsplash API Error in get_word_image() {"error":"No images found for word: sirena valiente","word":"sirena valiente","clean_word":"sirena+valiente+objeto+item"}
+[2026-01-19 05:34:12] WARNING: Failed to validate image URL for caching {"url":"https:\/\/source.unsplash.com\/featured\/400x400\/?sirena+valiente+objeto+item"}
+[2026-01-19 05:34:13] ERROR: Unsplash API Error in get_word_image() {"error":"No images found for word: buzo experto","word":"buzo experto","clean_word":"buzo+experto+objeto+item"}
+[2026-01-19 05:34:14] WARNING: Failed to validate image URL for caching {"url":"https:\/\/source.unsplash.com\/featured\/400x400\/?buzo+experto+objeto+item"}
+[2026-01-19 05:34:22] ERROR: Unsplash API Error in get_word_image() {"error":"No images found for word: un tesoro perdido","word":"un tesoro perdido","clean_word":"un+tesoro+perdido+objeto+item"}
+[2026-01-19 05:34:23] WARNING: Failed to validate image URL for caching {"url":"https:\/\/source.unsplash.com\/featured\/400x400\/?un+tesoro+perdido+objeto+item"}
+[2026-01-19 05:34:27] ERROR: Unsplash API Error in get_word_image() {"error":"No images found for word: un misterio sin resolver","word":"un misterio sin resolver","clean_word":"un+misterio+sin+resolver+objeto+item"}
+[2026-01-19 05:34:28] WARNING: Failed to validate image URL for caching {"url":"https:\/\/source.unsplash.com\/featured\/400x400\/?un+misterio+sin+resolver+objeto+item"}
